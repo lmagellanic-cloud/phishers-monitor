@@ -1,0 +1,81 @@
+.SideBar {
+    background-color: #17191b;
+}
+
+a {
+    color: white !important;
+}
+
+a:hover {
+    background-color: #8a8f94;
+    color: white !important;
+}
+
+.toggleSimulation{
+    color:white !important;
+}
+
+.toggleSimulationButton{
+    color:white !important;
+}
+
+.field {
+  padding: 15px;
+}
+.field:first-child {
+  border-top: none;
+}
+input[type="checkbox"] {
+  display: none;
+}
+.field {
+  display: relative;
+}
+.field label {
+  position: relative;
+  line-height: 32px;
+  display: block;
+  color: white;
+}
+.field label:before,
+.field label:after,
+.field label span:before,
+.field label span:after {
+  content: '';
+  display: block;
+  position: absolute;
+}
+.field label span {
+  position: relative;
+  cursor: pointer;
+  display: block;
+  float: right;
+}
+ 
+.check-round label span {
+  border-radius: 16px;
+  height: 32px;
+  width: 64px;
+}
+.check-round label span:before {
+  border-radius: 50%;
+  height: 28px;
+  width: 28px;
+  left: 2px;
+  top: 2px;
+}
+.check-round input:checked + label span:before {
+  left: 34px;
+}
+.check-round.slide label span {
+  background: rgb(192, 33, 33);
+  transition: background 0.4s ease-in;
+}
+.check-round.slide label span:before {
+  background: #ECF0F1;
+  transition: left 0.4s ease-in;
+}
+.check-round.slide input:checked + label span {
+  background: rgb(42, 161, 26);
+}
+

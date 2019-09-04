@@ -1,0 +1,62 @@
+#monitoredUserScreen{
+    background-color: #646769;
+    height: 100%;
+}
+
+h1 {
+    color: white;
+}
+
+.monitorCanvas {
+    image-rendering: crisp-edges;
+    width : 80%;
+    height: 80%;
+    margin: 0px;
+    background-color: green;
+}
+
+th{
+    font-size: 100%;
+}
+
+@media (max-width: 600px) {
+    th{
+        font-size: 3vw;
+    }
+}
+
+td{
+    text-align: center;
+    color: white;
+    background-color: #3b3d3f;
+}
+
+.indexTh{
+    width:3%
+}
+
+.modelTh{
+    width:30%;
+}
+
+.activityTh{
+    width:30%;
+}
+
+.compareTh{
+    width:30%;
+}
+
+.refreshButton{
+    border:none;
+    color: white !important;
+    background-color: #646769;
+    margin: auto;
+    display: block;
+    width: 100%;
+}
+
+.refreshButton:hover{
+
+}
+

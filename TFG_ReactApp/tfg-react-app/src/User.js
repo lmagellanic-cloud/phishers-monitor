@@ -1,0 +1,155 @@
+import React from 'react';
+import './User.css';
+import UserMonitor from './UserMonitor';
+import { connect } from 'react-redux';
+import { getMonitoredUserData, changeSensitivity } from './redux/actions';
+import { withRouter } from "react-router-dom";
+
+const urlUserData = "http://localhost:5000/monitoredUser/";
+
+class User extends React.Component {
+    constructor(props) {
+        super(props);
+        this.sliderSensibilidad = React.createRef();
+        this.refreshButton = React.createRef();
+    }
+
+    componentDidMount(){
+        this.sliderSensibilidad.current.value = this.props.sensitivity
+    }
+
+    realizarPeticionGET(){
+        var urlTemp = urlUserData + this.props.userName;
+        if(this.props.simulation){
+            urlTemp = urlTemp + "?simulate=1"
+        }
+        console.log("La ruta a refrescar en User es: ", urlTemp);
+        fetch(urlTemp).then((response) => {return response.json()})
+            .then( (data) => {
+            //console.log("dataJSON de button en MonitoredUsersList es: ", data);
+            this.props.dispatch(getMonitoredUserData(data));
+            this.props.history.push("/monitoredUser/" + this.props.userName);
+        });
+    }
+
+    generateTableRow(){
+        var arrayModelKeys = [];
+        var arrayActivityKeys = [];
+        var arrayCompareKeys = [];
+
+        var compare = this.props.monitoredUserData["compare"];
+        var monitoredJSON = this.props.monitoredUserData["monitoredJSON"];
+
+        if ((compare !== undefined) && (monitoredJSON !== undefined)){
+            Object.keys(compare).forEach((compareKey) =>{
+                //console.log("arrayCompareKeys en User.js es: ", compareKey);
+                arrayCompareKeys.push(compareKey);
+            });
+            Object.keys(monitoredJSON).forEach((monitoredJSONKey)=>{
+                if(monitoredJSONKey.includes("modelUserData_")){
+                    //console.log("arrayModelKeys en User.js es: ", monitoredJSONKey);
+                    arrayModelKeys.push(monitoredJSONKey);
+                }
+                if(monitoredJSONKey.includes("activityUserData_")){
+                    //console.log("arrayActivityKeys en User.js es: ", monitoredJSONKey);
+                    arrayActivityKeys.push(monitoredJSONKey);
+                }
+            });
+        }
+        
+
+        return(
+            <tbody>
+                { arrayModelKeys.map((key_3, index) => {
+                    var row_i = key_3.slice(-1);
+                    return(
+                        <tr key={row_i}>
+                            <td className="indexTd">
+                                {row_i}
+                            </td>
+                            <td className="modelTd">
+                                <UserMonitor doSensitivity={false} tipoCanvas={"modelTd"} index={ index } 
+                                    data={ monitoredJSON["modelUserData_" + row_i] } 
+                                >
+                                </UserMonitor>
+                            </td>
+                            <td className="activityTd">
+                                <UserMonitor doSensitivity={false} tipoCanvas={"activityTd"} index={ index } 
+                                    data={ monitoredJSON["activityUserData_" + row_i] } 
+                                >
+                                </UserMonitor>
+                            </td>
+                            <td className="compareTd">
+                                <UserMonitor doSensitivity={true} tipoCanvas={"compareTd"} index={ index } 
+                                    data={ compare["compare_" + row_i] } 
+                                >
+                                </UserMonitor>
+                            </td>
+                        </tr>
+                    );
+                })
+                }
+            </tbody>
+        );
+    }
+
+    addRefreshButton(){
+        return(<button ref={this.refreshButton} className="btn btn-sm btn-outline-secondary refreshButton" onClick= {
+            () => {
+                this.realizarPeticionGET();
+            }
+        }>Refresh</button>)
+    }
+
+    render(){
+        return(
+            <main id="monitoredUserScreen" role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 className="h2">{ this.props.userName }</h1>
+                    <div className="btn-toolbar mb-2 mb-md-0">
+                        <div className="btn-group mr-2">
+                            <button type="button" className="btn btn-sm btn-outline-secondary">Export</button>
+                        </div>
+                        <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">
+                            <span data-feather="options"></span>
+                            Opciones
+                        </button>
+                    </div>
+                </div>
+                <div className="w-100 slidecontainer">
+                    <input type="range" min="0" max="5" defaultValue= {0} step="1"
+                        className="slider" ref={ this.sliderSensibilidad }
+                        onChange = {(e) => {
+                                //console.log("Sensibilidad en User: ", this.sliderSensibilidad.current.value);
+                                this.props.dispatch(changeSensitivity(parseInt(e.target.value)));
+                            }
+                        }
+                    ></input>
+                </div>
+                <div className="table-responsive">
+                    <table className="table table-sm">
+                        <thead>
+                            <tr>
+                                <th className="text-center indexTh">#</th>
+                                <th className="text-center modelTh">Modelo</th>
+                                <th className="text-center activityTh">Actividad Actual</th>
+                                <th className="text-center compareTh">Diferencia</th>
+                            </tr>
+                        </thead>
+                        { this.generateTableRow() }
+                    </table>
+                </div>
+                { this.addRefreshButton() }
+            </main>
+        )
+    }
+}
+
+
+function mapStateToProps(state){
+    return{
+      ...state
+    };
+}
+
+export default withRouter(connect(mapStateToProps)(User));

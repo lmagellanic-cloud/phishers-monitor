@@ -8,7 +8,7 @@ Plataforma web que facilita el análisis visual del comportamiento de usuarios e
 * [Yarn]
 
 #### Linux dist. 
-Se recomienda utilizar el comando "curl" para instalarlo con las siguientes líneas:
+Se recomienda utilizar el comando "curl" para instalar los prerequisitos con las siguientes líneas:
 ```
 $ sudo apt-get update
 $ sudo apt-get install python3.6

@@ -1,67 +1,52 @@
 import React from 'react';
 import './MonitoredUsersList.css';
+import './By_all_models';
 import { connect } from 'react-redux';
-import { getMonitoredUserData } from './redux/actions';
+import { setOrderBy, BY_ALL_MODELS, BY_APLICATION } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
 import { withRouter } from "react-router-dom";
-
-const urlUserData = "http://localhost:5000/monitoredUser/";
+import By_all_models from './By_all_models';
 
 class MonitoredUsersList extends React.Component {
+    renderByOrderInChoice(){
+        switch(this.props.orderBy){
+            case BY_ALL_MODELS:
+                return(
+                    <By_all_models>
+                    </By_all_models>
+                );
+            case BY_APLICATION:
+                return(<h1>En desarrollo</h1>);
+            default:
+                return(
+                    <By_all_models>
+                    </By_all_models>
+                );
+        }
+    }
+
     render(){
         return(
             <div className="table-responsive">
-                <table className="table table-sm">
-                    <thead>
-                    <tr>
-                        <th className="text-center">#</th>
-                        <th className="text-center">Nombre</th>
-                    </tr>
-                    </thead>
-                    <tbody className="MonitoredUsersList">
-                        {this.props.monitoredUsers.map((monitoredUser, index)=>{
-                            return (
-                                <tr key={index}>
-                                    <td className="indexTd">{ index }</td>
-                                    <td className="userNameTd">
-                                        {
-                                            /*
-                                            <a key={index} href= {urlSite + monitoredUser}> 
-                                            {monitoredUser}
-                                            </a> 
-                                            */
-                                            /* 
-                                           <Link key={index} to= {"/monitoredUser/" + monitoredUser}> 
-                                           {monitoredUser}
-                                           </Link> 
-                                            */
-                                            
-                                            <button key={index} className="monitoredUserListItem" onClick= {
-                                                    () => {
-                                                        var urlTemp = urlUserData + monitoredUser;
-                                                        if(this.props.simulation){
-                                                            urlTemp = urlTemp + "?simulation=1";
-                                                        }
-                                                        fetch(urlTemp).then((response) => {return response.json()})
-                                                            .then( (data) => {
-                                                            //console.log("dataJSON de button en MonitoredUsersList es: ", data);
-                                                            this.props.dispatch(getMonitoredUserData(data));
-                                                            //window.location.replace(urlSite + monitoredUser);
-                                                            this.props.history.push("/monitoredUser/" + monitoredUser);
-                                                        });
-                                                    }
-                                                }
-                                            >
-                                                {monitoredUser}
-                                            </button>
-                                            
-                                        }
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                <div className="MonitoredUserList_tags">
+                    <button type="button" className="btn btn-sm btn-outline-secondary" 
+                        onClick={
+                            () => { 
+                                console.log("BY_ALL_MODELS");
+                                this.props.dispatch(setOrderBy(BY_ALL_MODELS)); 
+                            }
+                        }
+                    >Todos los modelos</button>
+                    <button type="button" className="btn btn-sm btn-outline-secondary"
+                        onClick={
+                            () => { 
+                                console.log("BY_APLICATION");
+                                this.props.dispatch(setOrderBy(BY_APLICATION)); 
+                            }
+                        }
+                    >Por aplicación</button>
+                </div>
+                {this.renderByOrderInChoice()}
             </div>
         );
     }

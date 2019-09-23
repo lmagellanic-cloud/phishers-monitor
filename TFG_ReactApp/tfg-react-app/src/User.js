@@ -42,16 +42,16 @@ class User extends React.Component {
 
         if ((compare !== undefined) && (monitoredJSON !== undefined)){
             Object.keys(compare).forEach((compareKey) =>{
-                //console.log("arrayCompareKeys en User.js es: ", compareKey);
+                //Pone todos los 'compares' del JSON en la variable local arrayCompareKeys
                 arrayCompareKeys.push(compareKey);
             });
             Object.keys(monitoredJSON).forEach((monitoredJSONKey)=>{
                 if(monitoredJSONKey.includes("modelUserData_")){
-                    //console.log("arrayModelKeys en User.js es: ", monitoredJSONKey);
+                    //Pone todos los 'modelUserData' del JSON en la variable local arrayModelKeys
                     arrayModelKeys.push(monitoredJSONKey);
                 }
                 if(monitoredJSONKey.includes("activityUserData_")){
-                    //console.log("arrayActivityKeys en User.js es: ", monitoredJSONKey);
+                    //Pone todos los 'activityUserData' del JSON en la variable local arrayActivityKeys
                     arrayActivityKeys.push(monitoredJSONKey);
                 }
             });
@@ -68,19 +68,31 @@ class User extends React.Component {
                                 {row_i}
                             </td>
                             <td className="modelTd">
-                                <UserMonitor doSensitivity={false} tipoCanvas={"modelTd"} index={ index } 
+                                <UserMonitor doSensitivity={false} 
+                                    tipoCanvas={"modelTd"} 
+                                    index={ index } 
+                                    widthCSS = { 85 }
+                                    heightCSS = { 85 }
                                     data={ monitoredJSON["modelUserData_" + row_i] } 
                                 >
                                 </UserMonitor>
                             </td>
                             <td className="activityTd">
-                                <UserMonitor doSensitivity={false} tipoCanvas={"activityTd"} index={ index } 
+                                <UserMonitor doSensitivity={false} 
+                                    tipoCanvas={"activityTd"} 
+                                    index={ index } 
+                                    widthCSS = { 85 }
+                                    heightCSS = { 85 }
                                     data={ monitoredJSON["activityUserData_" + row_i] } 
                                 >
                                 </UserMonitor>
                             </td>
                             <td className="compareTd">
-                                <UserMonitor doSensitivity={true} tipoCanvas={"compareTd"} index={ index } 
+                                <UserMonitor doSensitivity={true} 
+                                    tipoCanvas={"compareTd"} 
+                                    index={ index } 
+                                    widthCSS = { 85 }
+                                    heightCSS = { 85 }
                                     data={ compare["compare_" + row_i] } 
                                 >
                                 </UserMonitor>

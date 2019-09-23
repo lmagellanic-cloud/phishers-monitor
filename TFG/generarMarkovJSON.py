@@ -128,7 +128,11 @@ for user_i in range(usersNum):
     nombreFicheroGenerado = 'user_' + str(user_i) + '.json'
 
     #Creamos o modificamos el fichero json seleccionado
-    generatedJSONFile = open(generatedJSONDir + os.sep + nombreFicheroGenerado, 'w+')
+    try:
+        generatedJSONFile = open(generatedJSONDir + os.sep + nombreFicheroGenerado, 'w+')
+    except:
+        generatedJSONDir = workingDir + os.sep + 'generatedJSON'
+        generatedJSONFile = open(generatedJSONDir + os.sep + nombreFicheroGenerado, 'w+')
 
     #Escribimos el fichero json seleccionado
     generatedJSONFile.write('{' + '\n')

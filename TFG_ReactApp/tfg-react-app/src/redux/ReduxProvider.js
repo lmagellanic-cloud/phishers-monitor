@@ -4,6 +4,7 @@ import { createStore } from 'redux';
 
 import React from 'react';
 import App from '../App';
+import { BY_ALL_MODELS } from './actions';
 
 export default class ReduxProvider extends React.Component {
     constructor(props){
@@ -18,7 +19,8 @@ export default class ReduxProvider extends React.Component {
             ],
             monitoredUserData: "{ 'example': 'example' }",
             sensitivity: 0, 
-            simulation: false
+            simulation: false,
+            orderBy: BY_ALL_MODELS
         };
         this.store = this.configureStore();
     }

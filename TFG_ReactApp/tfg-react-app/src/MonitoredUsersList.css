@@ -45,3 +45,12 @@ thead th {
 .userNametd {
     width: 95vw;
 }
+
+.MonitoredUserList_tags{
+    display:flex
+}
+
+.MonitoredUserList_tags button{
+    flex:1;
+    height: 100%;
+}

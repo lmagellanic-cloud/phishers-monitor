@@ -66,9 +66,14 @@ class UserMonitor extends React.Component {
     }
 
     render(){
+        var widthCSS = this.props.widthCSS;
+        var heightCSS = this.props.heightCSS;
+        widthCSS = widthCSS.toString() + "%";
+        heightCSS = heightCSS.toString() + "%";
+
         return(
-            <canvas key={this.index} 
-                className="monitorCanvas" 
+            <canvas key={this.index}
+                style = {{"width" : widthCSS, "height:" : heightCSS }}
                 ref={this.canvasRef}
                 width={this.props.data.length}
                 height={this.props.data.length}

@@ -7,10 +7,8 @@ h1 {
     color: white;
 }
 
-.monitorCanvas {
+canvas {
     image-rendering: crisp-edges;
-    width : 80%;
-    height: 80%;
     margin: 0px;
     background-color: green;
 }
@@ -56,7 +54,4 @@ td{
     width: 100%;
 }
 
-.refreshButton:hover{
-
-}
 

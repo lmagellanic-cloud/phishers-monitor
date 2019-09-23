@@ -3,7 +3,7 @@ export const GET_MONITORED_USER_DATA = 'GET_MONITORED_USER_DATA';
 export const CHANGE_SENSITIVITY = 'CHANGE_SENSITIVITY';
 export const SIMULATION_ON_OFF = 'SIMULATION_ON_OFF';
 export const BY_ALL_MODELS = "BY_ALL_MODELS";
-export const BY_APLICATION = "BY_APLICATION";
+export const BY_APPLICATION = "BY_APPLICATION";
 
 /*
 Esta función es sólamente para la obtención de los nombres de los usuarios y no sus datos.
@@ -30,7 +30,7 @@ export function toggleSimulationAction(){
 export function setOrderBy(orderChoice){
     switch(orderChoice){
         case BY_ALL_MODELS: return { type: BY_ALL_MODELS };
-        case BY_APLICATION: return { type: BY_APLICATION };
+        case BY_APPLICATION: return { type: BY_APPLICATION };
         default: return { type: BY_ALL_MODELS };
     }
 }

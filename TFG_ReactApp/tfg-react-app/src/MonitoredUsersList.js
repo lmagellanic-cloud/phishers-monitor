@@ -1,8 +1,9 @@
 import React from 'react';
 import './MonitoredUsersList.css';
 import './By_all_models';
+import By_application from './By_application';
 import { connect } from 'react-redux';
-import { setOrderBy, BY_ALL_MODELS, BY_APLICATION } from './redux/actions';
+import { setOrderBy, BY_ALL_MODELS, BY_APPLICATION } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import By_all_models from './By_all_models';
@@ -15,8 +16,11 @@ class MonitoredUsersList extends React.Component {
                     <By_all_models>
                     </By_all_models>
                 );
-            case BY_APLICATION:
-                return(<h1>En desarrollo</h1>);
+            case BY_APPLICATION:
+                return(
+                    <By_application>
+                    </By_application>
+                );
             default:
                 return(
                     <By_all_models>
@@ -32,7 +36,6 @@ class MonitoredUsersList extends React.Component {
                     <button type="button" className="btn btn-sm btn-outline-secondary" 
                         onClick={
                             () => { 
-                                console.log("BY_ALL_MODELS");
                                 this.props.dispatch(setOrderBy(BY_ALL_MODELS)); 
                             }
                         }
@@ -40,8 +43,7 @@ class MonitoredUsersList extends React.Component {
                     <button type="button" className="btn btn-sm btn-outline-secondary"
                         onClick={
                             () => { 
-                                console.log("BY_APLICATION");
-                                this.props.dispatch(setOrderBy(BY_APLICATION)); 
+                                this.props.dispatch(setOrderBy(BY_APPLICATION)); 
                             }
                         }
                     >Por aplicación</button>

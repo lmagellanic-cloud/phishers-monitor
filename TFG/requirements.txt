@@ -21,7 +21,7 @@ language-selector==0.1
 launchpadlib==1.10.6
 lazr.restfulclient==0.13.5
 lazr.uri==1.0.3
-lazy-object-proxy==1.4.1
+lazy-object-proxy==1.4.2
 lightdm-gtk-greeter-settings==1.2.2
 MarkupSafe==1.1.1
 mccabe==0.6.1

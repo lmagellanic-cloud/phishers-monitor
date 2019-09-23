@@ -1,0 +1,23 @@
+
+.applicationTh{
+    width: 10%
+}
+
+.userActivityPreviewsTh{
+    width: 90%
+}
+
+button{
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background-color: #646769;
+    border: none;
+}
+
+button:hover{
+    background-color: #8a8f94;
+    color: white;
+    border: none;
+}
+

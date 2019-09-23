@@ -41,7 +41,7 @@ class SideBar extends React.Component {
                         <li className="field check-round slide">
                             <input type="checkbox" name="check-slide" id="check-slide" 
                             onClick= {() =>{this.onClickToggleSimulation()}}/>
-                            <label for="check-slide">Simulation on/off <span></span></label>
+                            <label htmlFor="check-slide">Simulation on/off <span></span></label>
                         </li>
                     </ul>
                 </div>

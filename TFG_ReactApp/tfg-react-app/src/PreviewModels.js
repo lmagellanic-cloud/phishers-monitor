@@ -74,7 +74,7 @@ class PreviewModels extends React.Component {
                 arrayModelKeys.map((key_3, index) => {
                     var row_i = key_3.slice(-1);
                     //console.log("Los datos de usuario " + monitoredUser + " para preview es: ", this.state.models["modelUserData_" + row_i] )
-                    return <UserMonitor className="UserMonitor" 
+                    return <UserMonitor key={index} className="UserMonitor" 
                         doSensitivity={false} tipoCanvas={"modelTd"} 
                         index={ index } 
                         widthCSS = { 5 }

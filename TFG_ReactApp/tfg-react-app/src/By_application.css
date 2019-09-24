@@ -7,7 +7,7 @@
     width: 90%
 }
 
-button{
+.divByActivity{
     width: 100%;
     display: flex;
     justify-content: space-around;
@@ -15,7 +15,7 @@ button{
     border: none;
 }
 
-button:hover{
+.divByActivity:hover{
     background-color: #8a8f94;
     color: white;
     border: none;

@@ -37,7 +37,7 @@ touch monitoredUsers.db
 
 Instala las dependencias necesarias para el servidor de Flask (~/TFG):
 ```
-$ pip3 freeze > requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 Genera ficheros JSON con el script generarMarkovJSON.py y añádelos a la base de datos con:

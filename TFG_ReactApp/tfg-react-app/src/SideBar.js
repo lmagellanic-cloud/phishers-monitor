@@ -27,10 +27,10 @@ class SideBar extends React.Component {
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/">
+                            <a className="nav-link" href="http://localhost:5000/">
                                 <span data-feather="fileJSON"></span>
                                 Gestionar JSON
-                            </Link>
+                            </a>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/">

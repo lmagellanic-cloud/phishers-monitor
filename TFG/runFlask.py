@@ -16,6 +16,7 @@ urlReactApp = "http://localhost:3000"
 def index():
     html = "<html>"
     html = html + "<h1>Bienvenido</h1>"
+    html = html + "<a href='http://localhost:3000/'>Ir a visualizaciones</a><br>"
     html = html + "<a href='http://localhost:5000/monitoredUsers'>Todos los usuarios monitorizados</a><br>"
     all_monitoredUser = manageMonitoredUsersDB.get_all_onlyNamesMonitoredUsers()
     for eachName in all_monitoredUser:

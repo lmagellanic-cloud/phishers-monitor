@@ -7,7 +7,7 @@
     width: 97%
 }
 
-button{
+.monitorModelsPreview{
     width: 100%;
     display: flex;
     justify-content: space-around;
@@ -15,7 +15,7 @@ button{
     border: none;
 }
 
-button:hover{
+.monitorModelsPreview:hover{
     background-color: #8a8f94;
     color: white;
     border: none;

@@ -57,7 +57,7 @@ class PreviewModels extends React.Component {
         }
 
         return(
-            <button key={monitoredUser} className="monitorPreview" onClick= {
+            <button key={monitoredUser} className="monitorModelsPreview" onClick= {
                 () => {
                     var urlTemp = urlUserData + monitoredUser;
                     if(this.props.simulation){

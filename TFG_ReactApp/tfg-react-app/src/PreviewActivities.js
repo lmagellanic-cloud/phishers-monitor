@@ -60,12 +60,12 @@ class PreviewActivities extends React.Component {
                         //El index de monitoredUsers es el mismo que el de this.props.activities
                         this.state.pointer.map((monitoredUser, index_button)=>{
                             //console.log("this.state.activities en render es: ", this.state.activities);
-                            console.log("this.state.activities[" + index_button + "] es: ", this.state.activities[index_button]);
+                            //console.log("this.state.activities[" + index_button + "] es: ", this.state.activities[index_button]);
                             if(this.state.activities[index_button] != undefined){
-                                console.log("this.state.activities dentro del return es: ", this.state.activities);
-                                console.log("monitoredUser antes del return es: ", monitoredUser);
+                                //console.log("this.state.activities dentro del return es: ", this.state.activities);
+                                //console.log("monitoredUser antes del return es: ", monitoredUser);
                                 return(
-                                    <button key={monitoredUser} className="monitorACtivityPreview" 
+                                    <button key={monitoredUser} className="monitorActivityPreview" 
                                     onClick={
                                         () => {
                                             var urlTemp = urlUserData + monitoredUser;

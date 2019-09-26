@@ -40,10 +40,15 @@ Instala las dependencias necesarias para el servidor de Flask (~/TFG):
 $ pip3 install -r requirements.txt
 ```
 
-Genera ficheros JSON con el script generarMarkovJSON.py y añádelos a la base de datos con:
+Genera ficheros JSON con el script generateDesiredJSON.py y añádelos a la base de datos con:
 ```
-python3 generarMarkovJSON.py 
-python3 monitoredUsersModels.py 
+python3 generateDesiredJSON.py 
+python3 create_and_insert_JSON_to_DB.py 
+```
+Si no deseas introducir ningún dato nada más que el número de usuarios, puedes usar los siguientes comandos:
+```
+python3 generateTotallyRandomJSON.py 
+python3 create_and_insert_JSON_to_DB.py 
 ```
 
 Y ejecuta los dos servidores Flask (localhost:5000) y Node.js (localhost:3000):

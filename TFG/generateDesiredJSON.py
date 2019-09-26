@@ -5,7 +5,7 @@ import sys
 import datetime
 import time
 import numpy as numpy
-import monitoredUsersModels
+import create_and_insert_JSON_to_DB
 
 #Condiciones iniciales
 esMatrizMarkov = True

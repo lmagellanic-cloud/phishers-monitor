@@ -11,6 +11,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 urlReactApp = "http://localhost:3000"
+user_infoGlobal = None
 
 @app.route('/')
 def index():
@@ -55,9 +56,11 @@ def resource(monitoredUser_id):
         temp = temp.replace("'", "\"")
         #print("\n" + "\033[92m" + str(temp) + "\033[0m" +  "\n")
         temp = json.loads(temp)
+        temp = extractKeysFromMonitoredJSON(temp)
         response = jsonify(
             id = monitoredUserSelected[0],
             monitoredUser = monitoredUserSelected[1],
+            user_info = user_infoGlobal,
             monitoredJSON = simulateActivity(temp, simulate),
             compare = diferenciarModeloYActividad(temp)
             )
@@ -164,3 +167,12 @@ def generateUserActivity(arrayToJSON, sigma):
 
     return truncatedActivityArray
 
+def extractKeysFromMonitoredJSON(jsonObject):
+    global user_infoGlobal
+    print("\n" + "\033[92m" + str(jsonObject) + "\033[0m" +  "\n")
+    for key in jsonObject.keys():
+        if  key == "user_info":
+            user_infoGlobal = jsonObject[key]
+    del jsonObject["user_info"]
+    print("\n" + "\033[94m" + str(jsonObject) + "\033[0m" +  "\n")
+    return jsonObject

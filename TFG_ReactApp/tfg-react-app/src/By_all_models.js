@@ -21,15 +21,10 @@ class By_all_models extends React.Component {
                     
                     //Comienzo de cada fila de todos los modelos de cada usuario
                     return (
-                        <tr key={index}>
-                        <td className="userName">{ monitoredUser }</td>
-                        <td className="userModelPreviews">
-                        <PreviewModels index={index}
+                        <PreviewModels key={index} index={index}
                         monitoredUser={monitoredUser}
                         >
                         </PreviewModels>
-                        </td>
-                        </tr>
                     );
                 })}
                 </tbody>

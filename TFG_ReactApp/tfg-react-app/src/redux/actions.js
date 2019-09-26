@@ -4,6 +4,7 @@ export const CHANGE_SENSITIVITY = 'CHANGE_SENSITIVITY';
 export const SIMULATION_ON_OFF = 'SIMULATION_ON_OFF';
 export const BY_ALL_MODELS = "BY_ALL_MODELS";
 export const BY_APPLICATION = "BY_APPLICATION";
+export const SHOW_ACTIVES_ON_OFF = "SHOW_ACTIVES_ON_OFF";
 
 /*
 Esta función es sólamente para la obtención de los nombres de los usuarios y no sus datos.
@@ -33,5 +34,9 @@ export function setOrderBy(orderChoice){
         case BY_APPLICATION: return { type: BY_APPLICATION };
         default: return { type: BY_ALL_MODELS };
     }
+}
+
+export function toggleShowActives(){
+    return { type: SHOW_ACTIVES_ON_OFF };
 }
 

@@ -3,7 +3,7 @@
 import os
 import sqlite3
 import json
-import monitoredUsersModels
+import create_and_insert_JSON_to_DB
 import manageMonitoredUsersDB
 import numpy as numpy
 from react.render import render_component
@@ -54,6 +54,8 @@ def resource(monitoredUser_id):
             monitoredUserSelected = manageMonitoredUsersDB.get_monitoredUserByName(monitoredUser_id)
         temp = monitoredUserSelected[2]
         temp = temp.replace("'", "\"")
+        temp = temp.replace("True", "true")
+        temp = temp.replace("False", "false")
         #print("\n" + "\033[92m" + str(temp) + "\033[0m" +  "\n")
         temp = json.loads(temp)
         temp = extractKeysFromMonitoredJSON(temp)
@@ -169,10 +171,10 @@ def generateUserActivity(arrayToJSON, sigma):
 
 def extractKeysFromMonitoredJSON(jsonObject):
     global user_infoGlobal
-    print("\n" + "\033[92m" + str(jsonObject) + "\033[0m" +  "\n")
+    #print("\n" + "\033[92m" + str(jsonObject) + "\033[0m" +  "\n")
     for key in jsonObject.keys():
         if  key == "user_info":
             user_infoGlobal = jsonObject[key]
     del jsonObject["user_info"]
-    print("\n" + "\033[94m" + str(jsonObject) + "\033[0m" +  "\n")
+    #print("\n" + "\033[94m" + str(jsonObject) + "\033[0m" +  "\n")
     return jsonObject

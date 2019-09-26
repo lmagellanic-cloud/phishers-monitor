@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { GET_MONITORED_USERS, GET_MONITORED_USER_DATA, 
-    CHANGE_SENSITIVITY, SIMULATION_ON_OFF, BY_ALL_MODELS, BY_APPLICATION } from './actions';
+    CHANGE_SENSITIVITY, SIMULATION_ON_OFF, BY_ALL_MODELS, BY_APPLICATION, SHOW_ACTIVES_ON_OFF } from './actions';
 
 function monitoredUsers(state = [], action={}){
     switch(action.type){
@@ -49,12 +49,22 @@ function orderBy(state = [], action={}){
     }
 }
 
+function showActives(state = [], action={}){
+    switch(action.type){
+        case SHOW_ACTIVES_ON_OFF:
+            return !state;
+        default:
+            return state;
+    }
+}
+
 const GlobalState = (combineReducers({
     monitoredUsers,
     monitoredUserData,
     sensitivity,
     simulation,
-    orderBy
+    orderBy,
+    showActives
 }));
 
 export default GlobalState;

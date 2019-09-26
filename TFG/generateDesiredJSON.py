@@ -140,6 +140,7 @@ for user_i in range(usersNum):
     generatedJSONFile.write('{' + '\n')
     generatedJSONFile.write('"user": "user_' + str(user_i) + '",' + '\n')
     generatedJSONFile.write('"user_info": {' + '\n')
+    generatedJSONFile.write('\t' + '"active":true,' + '\n')
     generatedJSONFile.write('\t' + '"json_timestamp":"' + str(datetime.datetime.now()) + '",' + '\n')
     millis = time.time() * 1000 #da un float y las unidades son milisegundos
     generatedJSONFile.write('\t' + '"json_timestamp_epoch":"' + str(millis) + '",' + '\n')

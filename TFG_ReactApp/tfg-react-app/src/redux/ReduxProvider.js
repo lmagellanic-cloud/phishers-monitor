@@ -20,7 +20,8 @@ export default class ReduxProvider extends React.Component {
             monitoredUserData: "{ 'example': 'example' }",
             sensitivity: 0, 
             simulation: false,
-            orderBy: BY_ALL_MODELS
+            orderBy: BY_ALL_MODELS,
+            showActives: false
         };
         this.store = this.configureStore();
     }

@@ -5,6 +5,7 @@ export const SIMULATION_ON_OFF = 'SIMULATION_ON_OFF';
 export const BY_ALL_MODELS = "BY_ALL_MODELS";
 export const BY_APPLICATION = "BY_APPLICATION";
 export const SHOW_ACTIVES_ON_OFF = "SHOW_ACTIVES_ON_OFF";
+export const ON_CHANGE_SEARHC = "ON_CHANGE_SEARCH";
 
 /*
 Esta función es sólamente para la obtención de los nombres de los usuarios y no sus datos.
@@ -38,5 +39,9 @@ export function setOrderBy(orderChoice){
 
 export function toggleShowActives(){
     return { type: SHOW_ACTIVES_ON_OFF };
+}
+
+export function onChangeSearch(index){
+    return { type: ON_CHANGE_SEARHC, payload: index};
 }
 

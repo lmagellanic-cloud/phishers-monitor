@@ -7,7 +7,6 @@ import { withRouter } from "react-router-dom";
 
 const urlUserData = "http://localhost:5000/monitoredUser/";
 
-
 class PreviewModels extends React.Component {
     constructor(props) {
         super(props);
@@ -16,9 +15,43 @@ class PreviewModels extends React.Component {
             active: true,
             isMounted: true
         };
-      }
+    }
+
+    checkIfUserShouldBeRequested(){
+        var showPreviewModel = true; //Renderizar o no
+        if(this.props.showActives){  //El personal de seguridad pide mostrar sólo los usuarios activos
+            if(this.state.active){  
+                    //Mostrar si el usuario no está activo
+                    showPreviewModel = true;
+            }else{
+                //No mostrar si el usuario no está activo
+                showPreviewModel = false;
+            }
+        }
+
+        if(this.props.search != ""){
+            if(this.props.monitoredUser.includes(this.props.search)){
+                //Mostrar cuando search no es nulo y coincide con monitoredUser
+                showPreviewModel = true;
+                if(this.props.showActives){  //El personal de seguridad pide mostrar sólo los usuarios activos
+                    if(this.state.active){  
+                            //Mostrar si el usuario no está activo
+                            showPreviewModel = true;
+                    }else{
+                        //No mostrar si el usuario no está activo
+                        showPreviewModel = false;
+                    }
+                }
+            }else{
+                //Que en caso contrario no se mostraría
+                showPreviewModel = false;
+            }
+        }
+        return showPreviewModel;
+    }
 
     componentDidMount(){
+        var showPreviewModel = this.checkIfUserShouldBeRequested();
         this.state.isMounted = true;
         var monitoredUser = this.props.monitoredUser;   //Nombre del usuario
         if(monitoredUser.includes("monitoredUser_")){
@@ -26,18 +59,20 @@ class PreviewModels extends React.Component {
         }
         var urlTemp = urlUserData + monitoredUser;
         //console.log("Fetch to: ", urlTemp);
-
+    
+        //Realizar petición sólo si se requiere que se muestre
         var user_info = 0;
-        fetch(urlTemp).then((response) => {return response.json()})
-            .then( (monitoredJSON) => {
-                user_info = monitoredJSON['user_info']; //obtiene un objeto que contiene la información de usuario, donde indica si está activo o no
-                user_info = user_info['active'];    //obtiene el valor del campo JSON 'active'
-                monitoredJSON = monitoredJSON['monitoredJSON']; //obtiene un objeto tanto como activityUserData y modelUserData
-                if(this.state.isMounted){
-                    this.setState({ models:monitoredJSON, active:user_info });
-                }
-        });
-        //console.log("monitoredJSON al realizar fetch en " + monitoredUser + " es: ", this.state.models);
+        if(showPreviewModel){
+            fetch(urlTemp).then((response) => {return response.json()})
+                .then( (monitoredJSON) => {
+                    user_info = monitoredJSON['user_info']; //obtiene un objeto que contiene la información de usuario, donde indica si está activo o no
+                    user_info = user_info['active'];    //obtiene el valor del campo JSON 'active'
+                    monitoredJSON = monitoredJSON['monitoredJSON']; //obtiene un objeto tanto como activityUserData y modelUserData
+                    if(this.state.isMounted){
+                        this.setState({ models:monitoredJSON, active:user_info });
+                    }
+            });
+        }
     }
 
     componentWillUnmount(){
@@ -48,8 +83,7 @@ class PreviewModels extends React.Component {
         var index = this.props.index;
         var arrayModelKeys = [];
         var monitoredUser = this.props.monitoredUser;   //Nombre del usuario
-       //console.log("Al renderizar el PreviewModels de "+ monitoredUser + " this.state.models es: ", this.state.models);
-        //console.log("this.state.active del usuario " + monitoredUser + " es: ", this.state.active);
+        var showPreviewModel = this.checkIfUserShouldBeRequested();
 
        //this.state.models obtiene un objeto tanto como activityUserData y modelUserData
         if (this.state.models !== undefined){
@@ -61,48 +95,8 @@ class PreviewModels extends React.Component {
             });
         }
 
-        if(this.props.showActives){  //El personal de seguridad pide mostrar sólo los usuarios activos
-            if(this.state.active){  //Entonces sólo se mostrarán los usuarios activos
-                return(
-                    <tr key={index}>
-                    <td className="userName">{ monitoredUser }</td>
-                    <td className="userModelPreviews">
-                    <button key={monitoredUser} className="monitorModelsPreview" onClick= {
-                        () => {
-                            var urlTemp = urlUserData + monitoredUser;
-                            if(this.props.simulation){
-                                urlTemp = urlTemp + "?simulation=1";
-                            }
-                            fetch(urlTemp).then((response) => {return response.json()})
-                                .then( (data) => {
-                                this.props.dispatch(getMonitoredUserData(data));
-                                this.props.history.push("/monitoredUser/" + monitoredUser);
-                            });
-                        }
-                    }>
-                    {
-                        arrayModelKeys.map((key_3, index) => {
-                            var row_i = key_3.slice(-1);
-                            //console.log("Los datos de usuario " + monitoredUser + " para preview es: ", this.state.models["modelUserData_" + row_i] )
-                            return <UserMonitor key={index} className="UserMonitor" 
-                                doSensitivity={false} tipoCanvas={"modelTd"} 
-                                index={ index } 
-                                widthCSS = { 5 }
-                                heightCSS = { 5 }
-                                data={ this.state.models["modelUserData_" + row_i] } 
-                            >
-                            </UserMonitor>
-                        })
-                    }
-                    </button>
-                    </td>
-                    </tr>
-                );
-            }else{
-                return null;
-            }
-        }else{
-            //Si el personal de seguridad no pide mostrar sólo usuarios activos, se mostrarán igualmente los usuarios no activos
+        if(showPreviewModel){
+            //Renderizar sólo si se requiere que se muestre
             return(
                 <tr key={index}>
                 <td className="userName">{ monitoredUser }</td>
@@ -138,6 +132,8 @@ class PreviewModels extends React.Component {
                 </td>
                 </tr>
             );
+        }else{
+            return null;
         }
     }
 }

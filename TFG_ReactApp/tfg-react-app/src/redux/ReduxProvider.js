@@ -21,7 +21,8 @@ export default class ReduxProvider extends React.Component {
             sensitivity: 0, 
             simulation: false,
             orderBy: BY_ALL_MODELS,
-            showActives: false
+            showActives: false, 
+            search: ""
         };
         this.store = this.configureStore();
     }

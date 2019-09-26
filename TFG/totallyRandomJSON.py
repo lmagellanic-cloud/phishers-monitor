@@ -2,6 +2,8 @@ import os
 import json
 import random
 import sys
+import datetime
+import time
 import numpy as numpy
 from random import randrange
 
@@ -17,7 +19,7 @@ workingDir = os.getcwd()
 #generatedJSONDir = workingDir + '/..' + os.sep + 'TFG' + os.sep + 'generatedJSON'
 generatedJSONDir = workingDir + os.sep + 'TFG' + os.sep + 'generatedJSON'
 
-usersNum = randrange(25)
+usersNum = int(input("Introduce el numero de usuarios deseados >> "))
 arrayDimension = 4
 arraysNum = randrange(3, 10)
 
@@ -121,6 +123,7 @@ def generateUserActivity(arrayToJSON, sigma):
                     activityArray[i][arrayDimension] -= activityArray[i][j]
     return activityArray
 
+#INICIO DEL PROGRAMA TOTALLYRANDOMJSON.PY
 
 #Bucle para crear n ficheros JSON
 for user_i in range(usersNum):
@@ -137,6 +140,13 @@ for user_i in range(usersNum):
     #Escribimos el fichero json seleccionado
     generatedJSONFile.write('{' + '\n')
     generatedJSONFile.write('"user": "user_' + str(user_i) + '",' + '\n')
+    generatedJSONFile.write('"user_info": {' + '\n')
+    generatedJSONFile.write('\t' + '"json_timestamp":"' + str(datetime.datetime.now()) + '",' + '\n')
+    millis = time.time() * 1000 #da un float y las unidades son milisegundos
+    generatedJSONFile.write('\t' + '"json_timestamp_epoch":"' + str(millis) + '",' + '\n')
+    epochInfo = "json_timestamp_epoch is the time in milliseconds since the epoch as a floating point number. Epoch is designed to be January 1, 1970, 00:00:00 (UTC)"
+    generatedJSONFile.write('\t' + '"json_timestamp_epoch_info":"' + epochInfo + '"' + '\n')
+    generatedJSONFile.write('},\n')
 
     #Variable array/list que contiene todos los arrays de modelo de usuario
     listAllModelUserData = []

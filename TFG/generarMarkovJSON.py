@@ -2,6 +2,8 @@ import os
 import json
 import random
 import sys
+import datetime
+import time
 import numpy as numpy
 import monitoredUsersModels
 
@@ -137,6 +139,13 @@ for user_i in range(usersNum):
     #Escribimos el fichero json seleccionado
     generatedJSONFile.write('{' + '\n')
     generatedJSONFile.write('"user": "user_' + str(user_i) + '",' + '\n')
+    generatedJSONFile.write('"user_info": {' + '\n')
+    generatedJSONFile.write('\t' + '"json_timestamp":"' + str(datetime.datetime.now()) + '",' + '\n')
+    millis = time.time() * 1000 #da un float y las unidades son milisegundos
+    generatedJSONFile.write('\t' + '"json_timestamp_epoch":"' + str(millis) + '",' + '\n')
+    epochInfo = "json_timestamp_epoch is the time in milliseconds since the epoch as a floating point number. Epoch is designed to be January 1, 1970, 00:00:00 (UTC)"
+    generatedJSONFile.write('\t' + '"json_timestamp_epoch_info":"' + epochInfo + '"' + '\n')
+    generatedJSONFile.write('},\n')
 
     for array_i in range(arraysNum):
         #Generamos matriz estocástica para array_i

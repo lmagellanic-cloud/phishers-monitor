@@ -23,6 +23,14 @@ usersNum = int(input("Introduce el numero de usuarios deseados >> "))
 arrayDimension = int(input("Introduce la dimensión de la matriz de transición >> "))
 arraysNum = int(input("Introduce el número de matrices de transición del usuario monitorizado >> "))
 
+def imprimirArrayPorConsola(array, colorCode): 
+    consola = str(array)
+    consola = consola.replace(", [", "\n")
+    consola = consola.strip("[")
+    consola = consola.strip("]")
+    consola = consola.replace("]\n", "\n")
+    print("\033[" + colorCode +"m" + consola + "\033[0m")
+
 def comprobarLimitesParámetros(inputNum):
     if (isinstance(inputNum, int)) and (inputNum > 0):
         return inputNum
@@ -67,7 +75,98 @@ def generarMatrizEstocastica():
                     arrayToJSON[i][j] = arrayToJSON[i][arrayDimension]
                     arrayToJSON[arrayDimension][j] -= arrayToJSON[i][j]
                     arrayToJSON[i][arrayDimension] -= arrayToJSON[i][j]
+
+    #Comprobamos si la última fila o columna del array tiene algún elemento negativo
+    for i in range(arrayDimension):
+        if(arrayToJSON[i][arrayDimension - 1] < 0):
+            print("\033[93m" + "arrayToJSON["+str(i)+"]["+str(arrayDimension-1)+ "] = " + str(arrayToJSON[i][arrayDimension - 1]) + "\033[0m" + "\n")
+            arrayToJSON = corregirMatrizEstocastica(arrayToJSON, arrayDimension, i, arrayDimension - 1) 
+            print("\033[93m" + "En usuario " + str(user_i) + " matriz nº " + str(array_i) + "\033[0m" + "\n")
+            print("\033[93m" + "arrayToJSON["+str(i)+"]["+str(arrayDimension-1)+ "] = " + str(arrayToJSON[i][arrayDimension - 1]) + "\033[0m" + "\n")
+    for j in range(arrayDimension):
+        if(arrayToJSON[arrayDimension - 1][j] < 0):
+            print("\033[92m" + "arrayToJSON["+str(arrayDimension-1)+"]["+str(j)+ "] = " + str(arrayToJSON[arrayDimension][j]) + "\033[0m" + "\n")
+            arrayToJSON = corregirMatrizEstocastica(arrayToJSON, arrayDimension, arrayDimension - 1, j) 
+            print("\033[92m" + "En usuario " + str(user_i) + " matriz nº " + str(array_i) + "\033[0m" + "\n")
+            print("\033[92m" + "arrayToJSON["+str(arrayDimension-1)+"]["+str(j)+ "] = " + str(arrayToJSON[arrayDimension][j]) + "\033[0m" + "\n")
+
     return arrayToJSON
+
+#Elimina elementos negativos en el arrayParam
+#arrayParam = Todo el array pasado como parámetro
+#row_pos = La fila en el que está colocado el elemento negativo
+#column_pos = La columna en el que está colocado el elemento negativo
+def corregirMatrizEstocastica(arrayParam, arrayDimension, row_pos, column_pos):
+    print("Matriz antes de corregirse")
+    imprimirArrayPorConsola(arrayParam, "94")
+    borde = arrayDimension - 1
+    max_row_pos = 0
+    maximo = 0
+    max_column_pos = 0
+    correccionLocal = 0
+    #Alterar la ultima fila para luego alterar las columnas
+    #Incluyo el caso de que el elemento negativo sea el último del array, ya que es indiferente si es manejando la fila o columna
+    if((row_pos == borde) or (row_pos == borde and column_pos == borde)):
+        max_column_pos = 0
+        #Buscamos el máximo de la última fila
+        for i in range(arrayDimension):
+            if(arrayParam[borde][i]) > maximo:
+                maximo = arrayParam[borde][i]
+                max_column_pos = i
+        #Encontrado el maximo valor de la última fila, compensamos los elementos involucrados
+        corregirValor = arrayParam[row_pos][column_pos]
+        corregirValor = abs(corregirValor)
+        print("\033[93m" + "CASO FILA U. corregirValor es: " + str(corregirValor) + "\033[0m")
+        print("\033[93m" + "CASO FILA U. maximo es: " + str(maximo) + "\033[0m")
+        print("\033[93m" + "CASO FILA U. max_column_pos es: " + str(max_column_pos) + "\033[0m")
+        arrayParam[row_pos][column_pos] = arrayParam[row_pos][column_pos] + corregirValor    #Corregimos elemento negativo, se espera que dé cero
+        arrayParam[borde][max_column_pos] = arrayParam[borde][max_column_pos] - corregirValor  #Compensamos éste elemento para que la última fila sea unitaria
+        corregirValor = corregirValor/(arrayDimension - 1)
+        #Modificamos las columnas afectadas por el cambio anterior, para que sigan sumando uno
+        for i in range(arrayDimension - 1):
+            if (arrayParam[i][column_pos] - corregirValor >= 0):
+                arrayParam[i][max_column_pos] = arrayParam[i][max_column_pos] + corregirValor  #Compensamos la columna del elemento de máximo valor
+                arrayParam[i][column_pos] = arrayParam[i][column_pos] - corregirValor  #Compensamos la columna del elemento negativo
+                if((arrayParam[i][column_pos] - correccionLocal >= 0) and (correccionLocal != 0)):
+                    arrayParam[i][max_column_pos] = arrayParam[i][max_column_pos] + correccionLocal  
+                    arrayParam[i][column_pos] = arrayParam[i][column_pos] - correccionLocal
+                    correccionLocal = 0
+            else:
+                correccionLocal += corregirValor
+
+    #Alterar la ultima columna para luego alterar las filas
+    elif(column_pos == borde):
+        max_row_pos = 0
+        #Buscamos el máximo de la última columna
+        for i in range(arrayDimension):
+            if(arrayParam[i][borde]) > maximo:
+                maximo = arrayParam[i][borde]
+                max_row_pos = i
+        #Encontrado el maximo valor de la última columna, compensamos los elementos involucrados
+        corregirValor = arrayParam[row_pos][column_pos]
+        corregirValor = abs(corregirValor)
+        print("\033[93m" + "CASO COLUMNA U. corregirValor es: " + str(corregirValor) + "\033[0m" + "\n")
+        print("\033[93m" + "CASO COLUMNA U. maximo es: " + str(maximo) + "\033[0m" + "\n")
+        print("\033[93m" + "CASO COLUMNA U. max_row_pos es: " + str(max_row_pos) + "\033[0m" + "\n")
+        arrayParam[row_pos][column_pos] = arrayParam[row_pos][column_pos] + corregirValor    #Corregimos elemento negativo, se espera que dé cero 
+        arrayParam[max_row_pos][borde] = arrayParam[max_row_pos][borde] - corregirValor  #Compensamos éste elemento para que la última fila sea unitaria
+        corregirValor = corregirValor/(arrayDimension - 1)
+        #Modificamos las columnas afectadas por el cambio anterior, para que sigan sumando uno
+        for i in range(arrayDimension - 1):
+            if (arrayParam[row_pos][i] - corregirValor >= 0):
+                arrayParam[max_row_pos][i] = arrayParam[max_row_pos][i] + corregirValor  #Compensamos la columna del elemento de máximo valor
+                arrayParam[row_pos][i] = arrayParam[row_pos][i] - corregirValor  #Compensamos la columna del elemento negativo
+                if ((arrayParam[row_pos][i] - correccionLocal >= 0) and (correccionLocal != 0)):
+                    arrayParam[max_row_pos][i] = arrayParam[max_row_pos][i] + correccionLocal
+                    arrayParam[row_pos][i] = arrayParam[row_pos][i] - correccionLocal
+                    correccionLocal = 0
+            else:
+                correccionLocal += corregirValor
+    print("Matriz después de corregirse")
+    imprimirArrayPorConsola(arrayParam, "95")
+    print("\n")
+    return arrayParam
+
 
 #Comprobacion que es matriz estocástica
 def comprobarMatrizEstocastica(arrayToJSON):
@@ -121,9 +220,26 @@ def generateUserActivity(arrayToJSON, sigma):
                     activityArray[i][j] = activityArray[i][arrayDimension]
                     activityArray[arrayDimension][j] -= activityArray[i][j]
                     activityArray[i][arrayDimension] -= activityArray[i][j]
+
+    #Comprobamos si la última fila o columna del array tiene algún elemento negativo
+    for i in range(arrayDimension):
+        if(activityArray[i][arrayDimension - 1] < 0):
+            print("\033[93m" + "-------------------------------------------------------------------------------" + "\033[0m" + "\n")
+            print("\033[93m" + "activityArray["+str(i)+"]["+str(arrayDimension-1)+ "] = " + str(activityArray[i][arrayDimension - 1]) + "\033[0m" + "\n")
+            activityArray = corregirMatrizEstocastica(activityArray, arrayDimension, i, arrayDimension - 1) 
+            print("\033[93m" + "En usuario " + str(user_i) + " matriz nº " + str(array_i) + "\033[0m" + "\n")
+            print("\033[93m" + "activityArray["+str(i)+"]["+str(arrayDimension-1)+ "] = " + str(activityArray[i][arrayDimension - 1]) + "\033[0m" + "\n")
+    for j in range(arrayDimension):
+        if(activityArray[arrayDimension - 1][j] < 0):
+            print("\033[93m" + "-------------------------------------------------------------------------------" + "\033[0m" + "\n")
+            print("\033[92m" + "activityArray["+str(arrayDimension-1)+"]["+str(j)+ "] = " + str(activityArray[arrayDimension - 1][j]) + "\033[0m" + "\n")
+            activityArray = corregirMatrizEstocastica(activityArray, arrayDimension, arrayDimension - 1, j) 
+            print("\033[92m" + "En usuario " + str(user_i) + " matriz nº " + str(array_i) + "\033[0m" + "\n")
+            print("\033[92m" + "activityArray["+str(arrayDimension-1)+"]["+str(j)+ "] = " + str(activityArray[arrayDimension - 1][j]) + "\033[0m" + "\n")
+
     return activityArray
 
-
+#INICIO DEL PROGRAMA
 #Bucle para crear n ficheros JSON
 for user_i in range(usersNum):
     #print(str(user_i))

@@ -19,7 +19,7 @@ class UserMonitor extends React.Component {
         var a = 255;
         for(var i=0; i<data.length; i++){
             for(var j=0; j<data[i].length; j++){
-                var temp = data[i][j]; 
+                var temp = data[j][i]; 
                 // 0 => 0%, 255 => 100%
                 temp = this.getSplineValue(temp);
                 r = (temp);

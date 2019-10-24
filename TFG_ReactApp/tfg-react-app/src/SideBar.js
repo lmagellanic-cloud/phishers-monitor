@@ -36,12 +36,6 @@ class SideBar extends React.Component {
                                 Gestionar JSON
                             </a>
                         </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/">
-                                <span data-feather="about"></span>
-                                About
-                            </Link>
-                        </li>
                         <li className="field check-round slide">
                             <input type="checkbox" name="check-slide" id="check-slide" 
                             onClick= {() =>{this.onClickToggleSimulation()}}/>

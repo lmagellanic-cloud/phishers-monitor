@@ -37,8 +37,12 @@ class User extends React.Component {
         var arrayActivityKeys = [];
         var arrayCompareKeys = [];
 
-        var compare = this.props.monitoredUserData["compare"];
-        var monitoredJSON = this.props.monitoredUserData["monitoredJSON"];
+        if(this.props.monitoredUserData["monitoredUser"] === this.props.userName){
+            var compare = this.props.monitoredUserData["compare"];
+            var monitoredJSON = this.props.monitoredUserData["monitoredJSON"];
+        }else{
+            this.realizarPeticionGET()
+        }
 
         if ((compare !== undefined) && (monitoredJSON !== undefined)){
             Object.keys(compare).forEach((compareKey) =>{
@@ -57,7 +61,6 @@ class User extends React.Component {
             });
         }
         
-
         return(
             <tbody>
                 { arrayModelKeys.map((key_3, index) => {

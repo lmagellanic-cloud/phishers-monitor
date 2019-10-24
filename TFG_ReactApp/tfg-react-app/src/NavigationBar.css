@@ -1,3 +1,8 @@
+.searchBar{
+  margin: 10px;
+  border-radius: 10px !important;
+}
+
 .companyName{
   text-decoration: none;
   text-align: center;

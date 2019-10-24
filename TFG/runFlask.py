@@ -126,40 +126,23 @@ def response_with_cors_same_origin_allowed(response):
 def generateUserActivity(arrayToJSON, sigma):
     arrayDimension = len(arrayToJSON[0])
     activityArray = [[1 for x in range(arrayDimension + 1)] for y in range(arrayDimension + 1)] 
-    for i in range(arrayDimension - 1):
-        for j in range(arrayDimension - 1):
-            #Rellena de manera aleatoria la matriz hasta (N-1)x(N-1)
-            #El borde (N+1)x(N+1) es sólo para ajustar m.estocástica
-            mu = arrayToJSON[i][j]
-            valorNormal = numpy.random.normal(mu, sigma)
-            if valorNormal < 0:
-                valorNormal = abs(valorNormal)
-            if valorNormal > 1:
-                valorNormal = valorNormal - 1
-                valorNormal = 1 - valorNormal
-            activityArray[i][j] = valorNormal
-            activityArray[arrayDimension][j] -= activityArray[i][j]
-            activityArray[i][arrayDimension] -= activityArray[i][j]
-
     for i in range(arrayDimension):
         for j in range(arrayDimension):
-            #Rellena ajustando m. estocástica la última fila y/o columna de la matriz NxN
+            #Rellena de manera aleatoria la matriz hasta (N-1)x(N-1)
             #El borde (N+1)x(N+1) es sólo para ajustar m.estocástica
-            if (i == arrayDimension - 1) and (j == arrayDimension - 1):
-                #La ultima fila y columna de la matriz NxN
-                activityArray[i][j] = activityArray[arrayDimension][j]
-                activityArray[arrayDimension][j] -= activityArray[i][j]
+            if j == arrayDimension - 1:
+                activityArray[i][j] = activityArray[i][arrayDimension]
                 activityArray[i][arrayDimension] -= activityArray[i][j]
             else:
-                #Cualesquiera de la ultima fila o columna
-                if i == arrayDimension - 1:
-                    activityArray[i][j] = activityArray[arrayDimension][j]
-                    activityArray[arrayDimension][j] -= activityArray[i][j]
-                    activityArray[i][arrayDimension] -= activityArray[i][j]
-                if j == arrayDimension - 1:
-                    activityArray[i][j] = activityArray[i][arrayDimension]
-                    activityArray[arrayDimension][j] -= activityArray[i][j]
-                    activityArray[i][arrayDimension] -= activityArray[i][j]
+                mu = arrayToJSON[i][j]
+                valorNormal = numpy.random.normal(mu, sigma)
+                if valorNormal < 0:
+                    valorNormal = abs(valorNormal)
+                if valorNormal > 1:
+                    valorNormal = valorNormal - 1
+                    valorNormal = 1 - valorNormal
+                activityArray[i][j] = valorNormal
+                activityArray[i][arrayDimension] -= activityArray[i][j]
 
     truncatedActivityArray = [[1 for x in range(arrayDimension)] for y in range(arrayDimension)] 
 

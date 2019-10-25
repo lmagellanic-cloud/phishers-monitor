@@ -5,9 +5,6 @@ import { toggleSimulationAction, toggleShowActives } from './redux/actions';
 import { connect } from 'react-redux';
 
 class SideBar extends React.Component {
-    constructor(props) {
-        super(props);
-    }
 
     onClickToggleSimulation(){
         //console.log("this.props.simulation antes disparar el botón",this.props.simulation);
@@ -27,13 +24,13 @@ class SideBar extends React.Component {
                         <li className="nav-item">
                             <Link className="nav-link" to="/">
                                 <span data-feather="home"></span>
-                                Usuarios monitorizados <span className="sr-only">(current)</span>
+                                Monitored Users <span className="sr-only">(current)</span>
                             </Link>
                         </li>
                         <li className="nav-item">
                             <a className="nav-link" href="http://localhost:5000/">
                                 <span data-feather="fileJSON"></span>
-                                Gestionar JSON
+                                Go to JSON provider
                             </a>
                         </li>
                         <li className="field check-round slide">
@@ -44,7 +41,7 @@ class SideBar extends React.Component {
                         <li className="field check-round slide">
                             <input type="checkbox" name="check-slide-showActives" id="check-slide-showActives" 
                             onClick= {() =>{this.onClickToggleShowActives()}}/>
-                            <label htmlFor="check-slide-showActives">Mostrar sólo usuarios activos <span></span></label>
+                            <label htmlFor="check-slide-showActives">Only show active users <span></span></label>
                         </li>
                     </ul>
                 </div>

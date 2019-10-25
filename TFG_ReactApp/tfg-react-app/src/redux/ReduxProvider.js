@@ -18,7 +18,7 @@ export default class ReduxProvider extends React.Component {
                 "monitoredUser_5"
             ],
             monitoredUserData: "{ 'example': 'example' }",
-            sensitivity: 0, 
+            sensitivity: 5, 
             simulation: false,
             orderBy: BY_ALL_MODELS,
             showActives: false, 

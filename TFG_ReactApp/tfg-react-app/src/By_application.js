@@ -3,9 +3,6 @@ import './By_application.css';
 import PreviewActivities from './PreviewActivities';
 import { connect } from 'react-redux';
 import { withRouter } from "react-router-dom";
-import { getMonitoredUserData } from './redux/actions';
-
-const urlUserData = "http://localhost:5000/monitoredUser/";
 
 class By_application extends React.Component {
 
@@ -31,8 +28,8 @@ class By_application extends React.Component {
             <table className="table table-sm">
                 <thead>
                 <tr>
-                    <th className="text-center applicationTh">Aplicación</th>
-                    <th className="text-center userActivityPreviewsTh">Previsualización de las actividades</th>
+                    <th className="text-center applicationTh">Service</th>
+                    <th className="text-center userActivityPreviewsTh">Activity Previews</th>
                 </tr>
                 </thead>
                 <tbody className="MonitoredUsersList">

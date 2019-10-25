@@ -29,7 +29,7 @@ class PreviewModels extends React.Component {
             }
         }
 
-        if(this.props.search != ""){
+        if(this.props.search !== ""){
             if(this.props.monitoredUser.includes(this.props.search)){
                 //Mostrar cuando search no es nulo y coincide con monitoredUser
                 showPreviewModel = true;

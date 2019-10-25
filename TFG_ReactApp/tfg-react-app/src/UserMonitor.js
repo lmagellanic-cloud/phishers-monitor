@@ -10,7 +10,6 @@ class UserMonitor extends React.Component {
     componentDidMount(){
         //console.log("this.props.sensitivity en UserMonitor es: ", this.props.sensitivity);
         var data = this.props.data;
-        var doSensitivity = this.props.doSensitivity;
         var canvas = this.canvasRef.current;
         var canvasContext = canvas.getContext("2d");
         var r = 255;

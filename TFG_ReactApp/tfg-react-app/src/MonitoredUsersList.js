@@ -1,30 +1,30 @@
 import React from 'react';
 import './MonitoredUsersList.css';
 import './By_all_models';
-import By_application from './By_application';
+import ByApplication from './By_application';
 import { connect } from 'react-redux';
 import { setOrderBy, BY_ALL_MODELS, BY_APPLICATION } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
 import { withRouter } from "react-router-dom";
-import By_all_models from './By_all_models';
+import ByAllModels from './By_all_models';
 
 class MonitoredUsersList extends React.Component {
     renderByOrderInChoice(){
         switch(this.props.orderBy){
             case BY_ALL_MODELS:
                 return(
-                    <By_all_models>
-                    </By_all_models>
+                    <ByAllModels>
+                    </ByAllModels>
                 );
             case BY_APPLICATION:
                 return(
-                    <By_application>
-                    </By_application>
+                    <ByApplication>
+                    </ByApplication>
                 );
             default:
                 return(
-                    <By_all_models>
-                    </By_all_models>
+                    <ByAllModels>
+                    </ByAllModels>
                 );
         }
     }
@@ -39,14 +39,14 @@ class MonitoredUsersList extends React.Component {
                                 this.props.dispatch(setOrderBy(BY_ALL_MODELS)); 
                             }
                         }
-                    >Todos los modelos</button>
+                    >All models</button>
                     <button type="button" className="btn btn-sm btn-outline-secondary"
                         onClick={
                             () => { 
                                 this.props.dispatch(setOrderBy(BY_APPLICATION)); 
                             }
                         }
-                    >Por aplicación</button>
+                    >Grouped by services</button>
                 </div>
                 {this.renderByOrderInChoice()}
             </div>

@@ -3,6 +3,12 @@
   border-radius: 10px !important;
 }
 
+.canvasArc{
+  width: 5%;
+  height: 5%;
+  background-color: transparent;
+}
+
 .companyName{
   text-decoration: none;
   text-align: center;

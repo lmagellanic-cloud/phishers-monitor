@@ -2,7 +2,7 @@ import React from 'react';
 import './User.css';
 import UserMonitor from './UserMonitor';
 import { connect } from 'react-redux';
-import { getMonitoredUserData, changeSensitivity } from './redux/actions';
+import { getMonitoredUserData, changeSensitivity, requestNewData } from './redux/actions';
 import { withRouter } from "react-router-dom";
 
 const urlUserData = "http://localhost:5000/monitoredUser/";
@@ -16,6 +16,7 @@ class User extends React.Component {
 
     componentDidMount(){
         this.sliderSensibilidad.current.value = this.props.sensitivity
+        
     }
 
     realizarPeticionGET(){
@@ -36,6 +37,11 @@ class User extends React.Component {
         var arrayModelKeys = [];
         var arrayActivityKeys = [];
         var arrayCompareKeys = [];
+
+        if(this.props.requestNewData){
+            this.realizarPeticionGET();
+            this.props.dispatch(requestNewData(false));
+        }
 
         if(this.props.monitoredUserData["monitoredUser"] === this.props.userName){
             var compare = this.props.monitoredUserData["compare"];
@@ -127,7 +133,7 @@ class User extends React.Component {
                         </div>
                         <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">
                             <span data-feather="options"></span>
-                            Opciones
+                            Options
                         </button>
                     </div>
                 </div>

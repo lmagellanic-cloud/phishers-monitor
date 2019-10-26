@@ -1,7 +1,7 @@
 import React from 'react';
 import UserMonitor from './UserMonitor';
 import { connect } from 'react-redux';
-import { getMonitoredUserData } from './redux/actions';
+import { getMonitoredUserData, requestNewData } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
 import { withRouter } from "react-router-dom";
 
@@ -51,6 +51,10 @@ class PreviewModels extends React.Component {
     }
 
     componentDidMount(){
+        if(this.props.requestNewData){
+            this.props.dispatch(requestNewData(false));
+            //this.forceUpdate();
+        }
         var showPreviewModel = this.checkIfUserShouldBeRequested();
         this.state.isMounted = true;
         var monitoredUser = this.props.monitoredUser;   //Nombre del usuario

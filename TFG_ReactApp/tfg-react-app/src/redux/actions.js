@@ -6,6 +6,7 @@ export const BY_ALL_MODELS = "BY_ALL_MODELS";
 export const BY_APPLICATION = "BY_APPLICATION";
 export const SHOW_ACTIVES_ON_OFF = "SHOW_ACTIVES_ON_OFF";
 export const ON_CHANGE_SEARHC = "ON_CHANGE_SEARCH";
+export const REQUEST_NEW_DATA = "REQUEST_NEW_DATA";
 
 /*
 Esta función es sólamente para la obtención de los nombres de los usuarios y no sus datos.
@@ -42,6 +43,9 @@ export function toggleShowActives(){
 }
 
 export function onChangeSearch(index){
-    return { type: ON_CHANGE_SEARHC, payload: index};
+    return { type: ON_CHANGE_SEARHC, payload: index };
 }
 
+export function requestNewData(value){
+    return {type: REQUEST_NEW_DATA, payload: value };
+}

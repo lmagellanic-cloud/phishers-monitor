@@ -1,8 +1,13 @@
 import React from 'react';
 import './NavigationBar.css';
+import User from "./User";
 import { connect } from 'react-redux';
-import { onChangeSearch, changeEndAngle } from './redux/actions';
+import { onChangeSearch, requestNewData } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
+import { withRouter } from "react-router-dom";
+
+const urlUserData = "http://localhost:3000/monitoredUser/";
+const urlHome = "localhost:3000/";
 
 class NavigationBar extends React.Component{
     constructor(props) {
@@ -12,7 +17,7 @@ class NavigationBar extends React.Component{
 
     componentDidMount(){
         this.drawCanvasArc(0);
-        var milisegundos = 5;
+        var milisegundos = 60;
         var tasaRefresco = 100;
         this.loopToRefreshArc(milisegundos, tasaRefresco, 0);
     }
@@ -27,7 +32,8 @@ class NavigationBar extends React.Component{
         setTimeout(() => {
             if(endAngle >= 2*Math.PI){
                 endAngle = 0.01;
-                console.log("SOLICITUD REALIZADA");
+                //console.log("SOLICITUD REALIZADA");
+                this.props.dispatch(requestNewData(true));
             }else{
                 endAngle = endAngle + (2*Math.PI/segundos)/(1000/tasaRefresco);
             }
@@ -87,4 +93,4 @@ function mapStateToProps(state){
     };
 }
 
-export default (connect(mapStateToProps)(NavigationBar));
+export default withRouter(connect(mapStateToProps)(NavigationBar));

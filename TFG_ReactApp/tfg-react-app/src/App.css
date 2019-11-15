@@ -1,3 +1,7 @@
+.row{
+  background-color: #646769 !important;
+}
+
 .App {
   text-align: center;
   min-height: 100%;

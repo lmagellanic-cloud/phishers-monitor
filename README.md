@@ -1,5 +1,5 @@
 # phishers-monitor
-Plataforma web que facilita el análisis visual del comportamiento de usuarios en sistemas interactivos para determinar su identidad, mediante suministro de ficheros JSON.
+Web platform that facilitates the visual analysis of user behavior in interactive systems to determine their identity, through the provision of JSON files.
 
 ### Prerequisites
 
@@ -7,8 +7,8 @@ Plataforma web que facilita el análisis visual del comportamiento de usuarios e
 * [Node.js]
 * [Yarn]
 
-#### Linux dist. 
-Se recomienda utilizar el comando "curl" para instalar los prerequisitos con las siguientes líneas:
+#### Unix distributions 
+It is recommended to use the "curl" command to install the prerequisites with the following commands:
 ```
 $ sudo apt-get update
 $ sudo apt-get install python3.6
@@ -18,50 +18,53 @@ $ sudo apt-get install -y nodejs
 $ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 $ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 $ sudo apt-get install yarn
+$ sudo apt-get install python3-pip
 ```
 
 ## Getting Started
 
-#### Linux dist. 
+#### Unix distributions 
 
-Abre el terminal y clonas el repositorio con el siguiente comando:
+Open the terminal and clone the repository with the following commands:
 ```
-git clone https://github.com/lmagellanic-cloud/phishers-monitor.git
-```
-
-Se necesita fichero "monitoredUsers.db" en TFG/databases/monitoredUsers/ para poder funcionar el servidor Flask:
-```
-cd phishers-monitor/TFG/databases/monitoredUsers/
-touch monitoredUsers.db
+$ git clone https://github.com/lmagellanic-cloud/phishers-monitor.git
+$ cd phishers-monitor/
 ```
 
-Instala las dependencias necesarias para el servidor de Flask (~/TFG):
+File "monitoredUsers.db" in TFG/databases/monitoredUsers/ is needed to run the Flask server:
 ```
-$ pip3 install -r requirements.txt
-```
-
-Genera ficheros JSON con el script generateDesiredJSON.py y añádelos a la base de datos con:
-```
-python3 generateDesiredJSON.py 
-python3 create_and_insert_JSON_to_DB.py 
-```
-Si no deseas introducir ningún dato nada más que el número de usuarios, puedes usar los siguientes comandos:
-```
-python3 generateTotallyRandomJSON.py 
-python3 create_and_insert_JSON_to_DB.py 
+$ touch TFG/databases/monitoredUsers/monitoredUsers.db 
 ```
 
-Y ejecuta los dos servidores Flask (localhost:5000) y Node.js (localhost:3000):
-Recarga la página localhost:5000 si no sale a la primera.
+Install the necessary dependencies for the Flask server:
 ```
-chmod 700 TFG/runTFG.sh 
-chmod 700 TFG_ReactApp/tfg-react-app/runTFG_ReactApp.sh 
-./TFG/runTFG.sh 
+$ pip3 install -r TFG/requirements.txt
 ```
-En una nueva terminal:
+
+Generate JSON files with the script generateTotallyRandomJSON.py and add them to the database (You can also use generateDesiredJSON.py file):
 ```
-cd TFG_ReactApp/tfg-react-app/
-./runTFG_ReactApp.sh 
+$ python3 TFG/generateTotallyRandomJSON.py 
+$ python3 TFG/create_and_insert_JSON_to_DB.py 
+```
+
+Install the necessary dependencies for the React server:
+```
+$ cd TFG_ReactApp/tfg-react-app/
+$ yarn install
+```
+
+And run the Flask server (localhost:5000) and React server (localhost:3000):
+Reloads the page localhost:5000 if it doesn't work at the first attempt.
+```
+$ chmod 700 TFG/runTFG.sh 
+$ chmod 700 TFG_ReactApp/tfg-react-app/runTFG_ReactApp.sh 
+$ cd TFG/ 
+$ ./runTFG.sh
+```
+Open a new terminal in phishers-monitor/:
+```
+$ cd TFG_ReactApp/tfg-react-app/
+$ ./runTFG_ReactApp.sh 
 ```
 
 ## License

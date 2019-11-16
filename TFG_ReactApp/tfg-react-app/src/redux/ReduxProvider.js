@@ -23,7 +23,8 @@ export default class ReduxProvider extends React.Component {
             orderBy: BY_ALL_MODELS,
             showActives: false, 
             search: "",
-            requestNewData: false
+            requestNewData: false,
+            alarmTreshold: 10
         };
         this.store = this.configureStore();
     }

@@ -128,13 +128,7 @@ class User extends React.Component {
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 className="h2">{ this.props.userName }</h1>
                     <div className="btn-toolbar mb-2 mb-md-0">
-                        <div className="btn-group mr-2">
-                            <button type="button" className="btn btn-sm btn-outline-secondary">Export</button>
-                        </div>
-                        <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">
-                            <span data-feather="options"></span>
-                            Options
-                        </button>
+                        
                     </div>
                 </div>
                 <div className="w-100 slidecontainer">
@@ -152,9 +146,9 @@ class User extends React.Component {
                         <thead>
                             <tr>
                                 <th className="text-center indexTh">#</th>
-                                <th className="text-center modelTh">Modelo</th>
-                                <th className="text-center activityTh">Actividad Actual</th>
-                                <th className="text-center compareTh">Diferencia</th>
+                                <th className="text-center modelTh">Model</th>
+                                <th className="text-center activityTh">Actual activity</th>
+                                <th className="text-center compareTh">Diference</th>
                             </tr>
                         </thead>
                         { this.generateTableRow() }

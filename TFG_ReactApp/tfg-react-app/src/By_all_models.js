@@ -12,8 +12,8 @@ class By_all_models extends React.Component {
             <table className="table table-sm">
                 <thead>
                 <tr>
-                    <th className="text-center userNameTh">Usuario</th>
-                    <th className="text-center modelsTh">Modelos</th>
+                    <th className="text-center userNameTh">User</th>
+                    <th className="text-center modelsTh">Models</th>
                 </tr>
                 </thead>
                 <tbody className="MonitoredUsersList">

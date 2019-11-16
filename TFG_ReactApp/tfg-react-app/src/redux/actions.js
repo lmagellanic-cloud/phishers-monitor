@@ -7,6 +7,7 @@ export const BY_APPLICATION = "BY_APPLICATION";
 export const SHOW_ACTIVES_ON_OFF = "SHOW_ACTIVES_ON_OFF";
 export const ON_CHANGE_SEARHC = "ON_CHANGE_SEARCH";
 export const REQUEST_NEW_DATA = "REQUEST_NEW_DATA";
+export const CHANGE_ALARM_TRESHOLD = "CHANGE_ALARM_TRESHOLD";
 
 /*
 Esta función es sólamente para la obtención de los nombres de los usuarios y no sus datos.
@@ -48,4 +49,22 @@ export function onChangeSearch(index){
 
 export function requestNewData(value){
     return {type: REQUEST_NEW_DATA, payload: value };
+}
+
+export function changeAlarmTreshold(value){
+    //treshold must be an entire number in range of 0-100
+    if(value === null){
+        value = 10;
+    }
+    /* if(value === ""){
+        value = 10;
+    } */
+    if(value < 0){
+        value = 0;
+    }
+    if (value > 100){
+        value = 100;
+    }
+    //console.log(value);
+    return {type: CHANGE_ALARM_TRESHOLD, payload: value};
 }

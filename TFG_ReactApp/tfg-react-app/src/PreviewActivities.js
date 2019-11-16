@@ -140,14 +140,14 @@ class PreviewActivities extends React.Component {
                                     return null;
                                 }
                             }else{
-                                return "Cargando datos"
+                                return "Loading..."
                             }
                         })
                     }
                 </div>
             );
         }else{
-            return "Cargando datos";
+            return "Loading...";
         }
     }
 }

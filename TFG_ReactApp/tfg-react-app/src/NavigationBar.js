@@ -2,11 +2,14 @@ import React from 'react';
 import './NavigationBar.css';
 import User from "./User";
 import { connect } from 'react-redux';
-import { onChangeSearch, requestNewData } from './redux/actions';
+import { onChangeSearch, requestNewData, changeAlarmTreshold } from './redux/actions';
 import { BrowserRouter as Router, Route, Link} from "react-router-dom";
 import { withRouter } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const urlUserData = "http://localhost:3000/monitoredUser/";
+const urlAlarm = "http://localhost:5000/getAlarms";
 const urlHome = "localhost:3000/";
 
 class NavigationBar extends React.Component{
@@ -34,6 +37,9 @@ class NavigationBar extends React.Component{
                 endAngle = 0.01;
                 //console.log("SOLICITUD REALIZADA");
                 this.props.dispatch(requestNewData(true));
+                if(this.props.alarmTreshold !== ""){
+                    this.getAlarms_GET_HTTP()
+                }
             }else{
                 endAngle = endAngle + (2*Math.PI/segundos)/(1000/tasaRefresco);
             }
@@ -70,6 +76,30 @@ class NavigationBar extends React.Component{
         context.fill();
     }
 
+    getAlarms_GET_HTTP(){
+        var urlTemp = urlAlarm + "?treshold_percentage=" + this.props.alarmTreshold;
+            //console.log("La ruta a refrescar en User es: ", urlTemp);
+            fetch(urlTemp).then((response) => {return response.json()})
+                .then( (data) => {
+                var datosJSONAlarm = data["alarms"];
+                /*
+                console.log("datosJSONAlarm es ", datosJSONAlarm);
+                console.log("datosJSONAlarm['no_alarm] es", datosJSONAlarm["no_alarm"]);
+                */
+                if(datosJSONAlarm["no_alarm"] === undefined){
+                    Object.keys(datosJSONAlarm).forEach((userKey) =>{
+                        Object.keys(datosJSONAlarm[userKey]).forEach((compareKey) =>{
+                            var activityKey = compareKey.replace("compare", "activity");
+                            var message = userKey + " " + activityKey +" : " + datosJSONAlarm[userKey][compareKey];
+                            toast(message, {
+                                position: toast.POSITION.TOP_CENTER,
+                            });
+                        });
+                    });
+                }
+            });
+    }
+
     render(){
         return[
             <nav key={1} className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
@@ -79,9 +109,19 @@ class NavigationBar extends React.Component{
                     placeholder="Search user" aria-label="Search" 
                     value={this.props.search}
                     onChange={(e)=>{
-                        this.props.dispatch(onChangeSearch(e.target.value));
+                            this.props.dispatch(onChangeSearch(e.target.value));
+                        }
                     }
-                }/>
+                />
+                <input type="number" className="form-control form-control-dark treshold" 
+                    placeholder="Alarm treshold %" aria-label="Alarm treshold"  min="1" max="100"
+                    value={this.props.alarmTreshold}
+                    onChange={(e)=>{
+                        this.props.dispatch(changeAlarmTreshold(e.target.value));
+                        }
+                    }
+                />
+                <ToastContainer autoClose={false} />
             </nav>
         ];
     }

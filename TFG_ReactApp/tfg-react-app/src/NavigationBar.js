@@ -89,8 +89,7 @@ class NavigationBar extends React.Component{
                 if(datosJSONAlarm["no_alarm"] === undefined){
                     Object.keys(datosJSONAlarm).forEach((userKey) =>{
                         Object.keys(datosJSONAlarm[userKey]).forEach((compareKey) =>{
-                            var activityKey = compareKey.replace("compare", "activity");
-                            var message = userKey + " " + activityKey +" : " + datosJSONAlarm[userKey][compareKey];
+                            var message = userKey + " " + compareKey +" : " + datosJSONAlarm[userKey][compareKey];
                             toast(message, {
                                 position: toast.POSITION.TOP_CENTER,
                             });

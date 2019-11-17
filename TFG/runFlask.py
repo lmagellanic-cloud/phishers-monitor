@@ -3,6 +3,7 @@
 import os
 import sqlite3
 import json
+import datetime
 import create_and_insert_JSON_to_DB
 import manageMonitoredUsersDB
 import numpy as numpy
@@ -80,6 +81,12 @@ def getAlarms():
                     selectedUser_JSON_Object[monitoredUser_id] = objetoTemporal #Objecto JSON que da la media de cada matriz compare del usuario seleccionado
         if selectedUser_JSON_Object == {}:
             selectedUser_JSON_Object["no_alarm"] = "no_alarm"
+        else:
+            #Generar fichero json en la carpeta de logs para almacenar las alarmas
+            fileLogAlarm = "alarms_at_" + str(datetime.datetime.now()) + ".json" 
+            with open(os.getcwd() + '/logs/' + fileLogAlarm, "a") as fileText:
+                fileText.write(str(selectedUser_JSON_Object).replace("\'", "\""))
+            fileText.close()
         response = jsonify(
             alarms = selectedUser_JSON_Object
         )
@@ -143,12 +150,13 @@ def resource(monitoredUser_id):
         #print("\n" + "\033[92m" + str(temp) + "\033[0m" +  "\n")
         temp = json.loads(temp)
         temp = extractKeysFromMonitoredJSON(temp)
+        resultForMonitoredJSON = simulateActivity(temp, simulate)
         allResult = diferenciarModeloYActividad(temp)
         response = jsonify(
             id = monitoredUserSelected[0],
             monitoredUser = monitoredUserSelected[1],
             user_info = user_infoGlobal,
-            monitoredJSON = simulateActivity(temp, simulate),
+            monitoredJSON = resultForMonitoredJSON,
             compare = allResult[0],
             average = allResult[1]
             )
@@ -163,7 +171,7 @@ def simulateActivity(temp, simulate):
     if simulate == 0:
         return temp
     else:
-        argumentoJSONIFY = temp
+        argumentoJSONIFYSimulate = temp
         numeroDeVariables = 0
         for element in temp:
             numeroDeVariables += 1
@@ -174,15 +182,13 @@ def simulateActivity(temp, simulate):
             modifyActivity = temp["activityUserData_" + str(compare_i)]
             sigma = 0.01
             modifyActivity = generateUserActivity(modifyActivity, sigma)
-            temp["activityUserData_" + str(compare_i)] = modifyActivity
-        return argumentoJSONIFY
+            argumentoJSONIFYSimulate["activityUserData_" + str(compare_i)] = modifyActivity
+        return argumentoJSONIFYSimulate
 
 def diferenciarModeloYActividad(temp):
     allReturn = []
     argumentoJSONIFY = {}
     argumentoJSONIFYAlarms = {}
-    allAverageOfUserArray = []
-
 
     numeroDeVariables = 0
     for element in temp:
@@ -213,7 +219,9 @@ def diferenciarModeloYActividad(temp):
         argumentoJSONIFYAlarms["average_of_compare_" + str(compare_i)] = average
         #Almacenamos la matriz 'compare' en un objeto para el JSON
         argumentoJSONIFY["compare_" + str(compare_i)] = arrayCompare
-    allReturn = [argumentoJSONIFY, argumentoJSONIFYAlarms]
+    allReturn = []
+    allReturn.append(argumentoJSONIFY)
+    allReturn.append(argumentoJSONIFYAlarms)
     return allReturn
 
 
@@ -251,7 +259,6 @@ def generateUserActivity(arrayToJSON, sigma):
     for i in range(arrayDimension):
         for j in range(arrayDimension):
             truncatedActivityArray[i][j] = activityArray[i][j]
-
     return truncatedActivityArray
 
 def extractKeysFromMonitoredJSON(jsonObject):

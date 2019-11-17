@@ -20,6 +20,7 @@ class User extends React.Component {
     }
 
     realizarPeticionGET(){
+        console.log("datosJSON Input: ", this.props.monitoredUserData);
         var urlTemp = urlUserData + this.props.userName;
         if(this.props.simulation){
             urlTemp = urlTemp + "?simulate=1"
@@ -30,6 +31,7 @@ class User extends React.Component {
             //console.log("dataJSON de button en MonitoredUsersList es: ", data);
             this.props.dispatch(getMonitoredUserData(data));
             this.props.history.push("/monitoredUser/" + this.props.userName);
+            console.log("datosJSON Output: ", data);
         });
     }
 

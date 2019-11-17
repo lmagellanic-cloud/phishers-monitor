@@ -16,17 +16,30 @@ class UserMonitor extends React.Component {
         var g = 0;
         var b = 0;
         var a = 255;
-        for(var i=0; i<data.length; i++){
-            for(var j=0; j<data[i].length; j++){
-                var temp = data[j][i]; 
+        if(this.props.isLegend){
+            for(var i=0; i<data.length; i++){
+                var temp = data[i]; 
                 // 0 => 0%, 255 => 100%
                 temp = this.getSplineValue(temp);
                 r = (temp);
                 g = (255 - temp);
                 canvasContext.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
-                canvasContext.fillRect( i, j, 1, 1 );   //Set pixel in (i, j)
+                canvasContext.fillRect( i, 0, 1, 1 );   //Set pixel in (i, j)
+            }
+        }else{
+            for(var i=0; i<data.length; i++){
+                for(var j=0; j<data[i].length; j++){
+                    var temp = data[j][i]; 
+                    // 0 => 0%, 255 => 100%
+                    temp = this.getSplineValue(temp);
+                    r = (temp);
+                    g = (255 - temp);
+                    canvasContext.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
+                    canvasContext.fillRect( i, j, 1, 1 );   //Set pixel in (i, j)
+                }
             }
         }
+        
     }
 
     getSplineValue(x){
@@ -70,14 +83,25 @@ class UserMonitor extends React.Component {
         widthCSS = widthCSS.toString() + "%";
         heightCSS = heightCSS.toString() + "%";
 
-        return(
-            <canvas key={this.index}
-                style = {{"width" : widthCSS, "height:" : heightCSS }}
-                ref={this.canvasRef}
-                width={this.props.data.length}
-                height={this.props.data.length}
-            ></canvas>
-        );
+        if(this.props.isLegend){
+            return(
+                <canvas key={this.index}
+                    style = {{"width" : widthCSS, "height:" : heightCSS }}
+                    ref={this.canvasRef}
+                    width={this.props.data.length}
+                    height={1}
+                ></canvas>
+            );
+        }else{
+            return(
+                <canvas key={this.index}
+                    style = {{"width" : widthCSS, "height:" : heightCSS }}
+                    ref={this.canvasRef}
+                    width={this.props.data.length}
+                    height={this.props.data.length}
+                ></canvas>
+            );
+        }
     }
 }
 

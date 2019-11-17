@@ -7,6 +7,18 @@ h1 {
     color: white;
 }
 
+.legend_of_heatmaps{
+    width: 35%;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.legend_of_heatmaps span{
+    color: white;
+    display: inline;
+}
+
 canvas {
     image-rendering: crisp-edges;
     margin: 0px;

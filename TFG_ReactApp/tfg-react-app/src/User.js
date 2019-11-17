@@ -129,8 +129,17 @@ class User extends React.Component {
             <main id="monitoredUserScreen" role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 className="h2">{ this.props.userName }</h1>
-                    <div className="btn-toolbar mb-2 mb-md-0">
-                        
+                    <div className="legend_of_heatmaps">
+                        <span>0.0</span>
+                        <UserMonitor isLegend={true} doSensitivity={true} 
+                            tipoCanvas={"compareTd"} 
+                            index={ 1 } 
+                            widthCSS = { 50 }
+                            heightCSS = { 50 }
+                            data={ [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] } 
+                        >
+                        </UserMonitor>
+                        <span>1.0</span>
                     </div>
                 </div>
                 <div className="w-100 slidecontainer">

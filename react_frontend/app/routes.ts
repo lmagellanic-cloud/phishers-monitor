@@ -1,0 +1,6 @@
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
+
+export default [
+  index("./routes/monitored-users.tsx"),
+  route("files", "./routes/files.tsx"),
+] satisfies RouteConfig;

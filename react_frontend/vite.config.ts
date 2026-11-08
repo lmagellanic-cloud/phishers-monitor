@@ -7,6 +7,9 @@ export default defineConfig({
     host: "localhost",
     port: 3000,
     strictPort: true,
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
     proxy: {
       "/phishers/files": {
         target: process.env.DJANGO_API_TARGET || "http://localhost:8080",

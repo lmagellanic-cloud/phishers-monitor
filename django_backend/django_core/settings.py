@@ -93,11 +93,11 @@ WSGI_APPLICATION = "django_core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
+SQLITE3_FILE_PATH = os.getenv("DJANGO_DB_PATH", PROYECT_ROOT / "bind-mounts/db.sqlite3")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.getenv("DJANGO_DB_PATH", BASE_DIR / "db.sqlite3"),
+        "NAME": SQLITE3_FILE_PATH,
     }
 }
 

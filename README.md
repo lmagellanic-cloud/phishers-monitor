@@ -52,7 +52,7 @@ The deployment runs Django, React Router, and Traefik. The application is availa
 cp .env.example .env
 ```
 
-Edit `.env` and replace `DJANGO_SECRET_KEY` and `SESSION_SECRET` with independent random values. Then start the services:
+Edit `.env` and replace `SECRET_KEY` and `SESSION_SECRET` with independent random values. Then start the services:
 
 ```sh
 docker compose up --build
@@ -63,6 +63,8 @@ Open <http://localhost>. To create a user account, run:
 ```sh
 docker compose exec django python manage.py createsuperuser
 ```
+
+To monitor this Podman host and its containers, add a system in the Beszel Hub at `https://beszel.localhost`, copy the generated `KEY` and `TOKEN` into `.env`, then start the agent with `podman compose --profile monitoring up -d`.
 
 Stop the services with `docker compose down`. To also delete the persistent database and uploaded files, run `docker compose down --volumes`.
 

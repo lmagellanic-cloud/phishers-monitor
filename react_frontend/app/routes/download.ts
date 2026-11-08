@@ -29,15 +29,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const previewContentType = new URL(request.url).searchParams.get("preview") === "1"
     ? previewContentTypes[extension]
     : undefined;
+  const range = request.headers.get("Range");
   const response = await fetchApi(
     request,
     `${apiBaseUrl}/phishers/files/${filename}/download/`,
+    range ? { headers: { Range: range } } : {},
   );
   const headers = new Headers();
   for (const name of [
     "content-type",
     "content-disposition",
     "content-length",
+    "content-range",
+    "accept-ranges",
     "x-content-md5",
   ]) {
     const value = response.headers.get(name);

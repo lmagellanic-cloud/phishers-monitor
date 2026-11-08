@@ -3,19 +3,19 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /django_backend
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY django_backend/ ./
 RUN SECRET_KEY=collectstatic-build-key python manage.py collectstatic --noinput
-RUN mkdir -p /data /app/media \
-    && groupadd --system app \
-    && useradd --system --gid app app \
-    && chown -R app:app /data /app/media
+RUN mkdir -p /data /django_backend/media \
+    && groupadd --system django_backend \
+    && useradd --system --gid django_backend django_backend \
+    && chown -R django_backend:django_backend /data /django_backend/media
 
-USER app
+USER django_backend
 
 EXPOSE 8000
 

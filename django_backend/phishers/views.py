@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.contrib.auth.models import Group, User
 from django.core.files.storage import default_storage
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import redirect
 from rest_framework import status, viewsets
 from rest_framework.response import Response
@@ -80,6 +80,15 @@ def _md5_for_storage(path):
         for chunk in iter(lambda: stored_file.read(64 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _iter_file_range(stored_file, length):
+    while length:
+        chunk = stored_file.read(min(64 * 1024, length))
+        if not chunk:
+            break
+        length -= len(chunk)
+        yield chunk
 
 
 class FilesView(APIView):
@@ -193,9 +202,42 @@ class FileDownloadView(APIView):
                 {"detail": "El fichero no existe."}, status=status.HTTP_404_NOT_FOUND
             )
 
-        response = FileResponse(
-            default_storage.open(filename, "rb"), as_attachment=True, filename=filename
-        )
+        file_size = default_storage.size(filename)
+        range_header = request.headers.get("Range", "")
+        byte_range = None
+        if range_header.startswith("bytes=") and "," not in range_header:
+            range_start, separator, range_end = range_header[6:].partition("-")
+            if separator and (range_start.isdigit() or range_end.isdigit()):
+                if range_start.isdigit():
+                    start = int(range_start)
+                    end = int(range_end) if range_end.isdigit() else file_size - 1
+                else:
+                    suffix_length = int(range_end)
+                    start = max(file_size - suffix_length, 0)
+                    end = file_size - 1
+
+                if (
+                    file_size == 0
+                    or start >= file_size
+                    or end < start
+                    or (not range_start and int(range_end) == 0)
+                ):
+                    response = HttpResponse(status=416)
+                    response["Content-Range"] = f"bytes */{file_size}"
+                    response["Accept-Ranges"] = "bytes"
+                    return response
+                byte_range = (start, min(end, file_size - 1))
+
+        file = default_storage.open(filename, "rb")
+        response = FileResponse(file, as_attachment=True, filename=filename)
+        response["Accept-Ranges"] = "bytes"
+        if byte_range:
+            start, end = byte_range
+            file.seek(start)
+            response.streaming_content = _iter_file_range(file, end - start + 1)
+            response.status_code = 206
+            response["Content-Length"] = str(end - start + 1)
+            response["Content-Range"] = f"bytes {start}-{end}/{file_size}"
         response["X-Content-MD5"] = _md5_for_storage(filename)
         return response
 

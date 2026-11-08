@@ -1,0 +1,54 @@
+# http routing section
+http:
+  routers:
+    whoami:
+      entryPoints:
+        - websecure
+      tls: {}
+      rule: PathPrefix(`/whoami`)
+      service: whoami
+
+    django:
+      entryPoints:
+        - websecure
+      tls: {}
+      priority: 100
+      rule: 'Host(`{{ env "APP_HOST" }}`) && (PathPrefix(`/phishers`) || PathPrefix(`/media`) || PathPrefix(`/static`) || PathPrefix(`/admin`))'
+      service: django
+
+    react:
+      entryPoints:
+        - websecure
+      tls: {}
+      priority: 1
+      rule: 'Host(`{{ env "APP_HOST" }}`)'
+      service: react
+
+    beszel:
+      entryPoints:
+        - websecure
+      tls: {}
+      priority: 2
+      rule: 'Host(`beszel.{{ env "APP_HOST" }}`)'
+      service: beszel
+
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: http://traefik-whoami:80
+
+    django:
+      loadBalancer:
+        servers:
+          - url: http://django:8000
+
+    react:
+      loadBalancer:
+        servers:
+          - url: http://react:3000
+
+    beszel:
+      loadBalancer:
+        servers:
+          - url: http://beszel:8090

@@ -99,6 +99,24 @@ class LocalFilesApiTests(TestCase):
         self.assertEqual(delete_response.status_code, 204)
         self.assertFalse(default_storage.exists(filename))
 
+    def test_download_supports_byte_ranges(self):
+        upload_response = self.client.post(
+            reverse("files"),
+            {"file": SimpleUploadedFile("clip.mp4", b"0123456789")},
+            format="multipart",
+        )
+
+        response = self.client.get(
+            reverse("download_file", args=[upload_response.data["name"]]),
+            HTTP_RANGE="bytes=2-5",
+        )
+
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response["Accept-Ranges"], "bytes")
+        self.assertEqual(response["Content-Range"], "bytes 2-5/10")
+        self.assertEqual(response["Content-Length"], "4")
+        self.assertEqual(b"".join(response.streaming_content), b"2345")
+
     def test_create_folder_and_manage_files_inside_it(self):
         folder_response = self.client.post(
             reverse("create_file_folder"), {"path": "", "name": "reports"}

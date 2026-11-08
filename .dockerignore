@@ -1,0 +1,11 @@
+.env
+.git
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+*.sqlite3
+django_backend/media
+react_frontend
+**/node_modules

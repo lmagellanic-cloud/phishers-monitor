@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { isRouteErrorResponse, Link, useFetcher, useRevalidator } from "react-router";
+import { Form, isRouteErrorResponse, Link, useFetcher, useRevalidator } from "react-router";
 import type { Route } from "./+types/files";
+import { apiBaseUrl, fetchApi } from "../auth.server";
+import { SidebarNavigation } from "../components/sidebar-navigation";
+import { calculateMd5 } from "../file-integrity";
 import "../files.css";
 
 type StoredFile = {
@@ -27,10 +30,25 @@ type FileActionResult = {
   error?: string;
 };
 
-const apiBaseUrl = (process.env.DJANGO_API_TARGET ?? "http://localhost:8080").replace(
-  /\/+$/,
-  "",
-);
+type TransferProgress = {
+  phase: string;
+  filename: string;
+  progress: number;
+};
+
+type UploadedFile = {
+  name: string;
+  md5: string;
+};
+
+type FilePreview = {
+  file: StoredFile;
+  kind: "image" | "video";
+};
+
+const imageExtensions = new Set(["avif", "gif", "jpeg", "jpg", "png", "webp"]);
+const videoExtensions = new Set(["mp4", "ogg", "webm"]);
+
 const filesApiUrl = `${apiBaseUrl}/phishers/files/`;
 
 function encodeStoragePath(path: string) {
@@ -46,12 +64,80 @@ async function responseError(response: Response) {
   }
 }
 
+function sendFileUpload(
+  file: File,
+  path: string,
+  md5: string,
+  onProgress: (progress: number) => void,
+  onVerifying: () => void,
+) {
+  return new Promise<UploadedFile>((resolve, reject) => {
+    const formData = new FormData();
+    formData.set("file", file, file.name);
+    formData.set("path", path);
+    formData.set("md5", md5);
+
+    const request = new XMLHttpRequest();
+    request.open("POST", "/upload");
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    request.upload.onload = onVerifying;
+    request.onload = () => {
+      let result: UploadedFile & { error?: string };
+      try {
+        result = JSON.parse(request.responseText) as UploadedFile & { error?: string };
+      } catch {
+        reject(new Error(`No se pudo completar la subida de ${file.name}.`));
+        return;
+      }
+      if (request.status < 200 || request.status >= 300) {
+        reject(new Error(result.error || `Error ${request.status}`));
+        return;
+      }
+      resolve(result);
+    };
+    request.onerror = () => reject(new Error(`Error de red al subir ${file.name}.`));
+    request.onabort = () => reject(new Error(`Se canceló la subida de ${file.name}.`));
+    request.send(formData);
+  });
+}
+
+function requestFileDownload(
+  path: string,
+  onProgress: (progress: number) => void,
+) {
+  return new Promise<{ blob: Blob; md5: string }>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", `/download/${encodeStoragePath(path)}`);
+    request.responseType = "blob";
+    request.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    request.onload = () => {
+      if (request.status < 200 || request.status >= 300) {
+        reject(new Error(`No se pudo descargar ${path} (Error ${request.status}).`));
+        return;
+      }
+      const md5 = request.getResponseHeader("X-Content-MD5");
+      if (!md5) {
+        reject(new Error("Django no devolvió el MD5 del fichero descargado."));
+        return;
+      }
+      resolve({ blob: request.response as Blob, md5 });
+    };
+    request.onerror = () => reject(new Error(`Error de red al descargar ${path}.`));
+    request.onabort = () => reject(new Error(`Se canceló la descarga de ${path}.`));
+    request.send();
+  });
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const requestedPath = new URL(request.url).searchParams.get("path") ?? "";
   const apiUrl = new URL(filesApiUrl);
   if (requestedPath) apiUrl.searchParams.set("path", requestedPath);
 
-  const response = await fetch(apiUrl);
+  const response = await fetchApi(request, apiUrl);
   if (!response.ok) {
     throw new Response("No se pudieron cargar los archivos desde Django REST.", {
       status: response.status,
@@ -60,7 +146,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   return {
     ...(await response.json()) as FilesResponse,
-    downloadBaseUrl: apiBaseUrl,
   };
 }
 
@@ -69,29 +154,6 @@ export async function action({ request }: Route.ActionArgs): Promise<FileActionR
   const intent = formData.get("intent");
 
   try {
-    if (intent === "upload") {
-      const uploads = formData.getAll("files").filter((file) => typeof file !== "string");
-      if (uploads.length === 0) {
-        return { intent, error: "Selecciona al menos un archivo para subir." };
-      }
-
-      const path = formData.get("path");
-      for (const file of uploads) {
-        const uploadData = new FormData();
-        uploadData.append("file", file, file.name);
-        if (typeof path === "string") uploadData.append("path", path);
-        const response = await fetch(filesApiUrl, { method: "POST", body: uploadData });
-        if (!response.ok) return { intent, error: await responseError(response) };
-      }
-
-      return {
-        intent,
-        message: uploads.length === 1
-          ? `Se ha subido ${uploads[0].name}.`
-          : `Se han subido ${uploads.length} archivos.`,
-      };
-    }
-
     if (intent === "create-folder") {
       const folderName = formData.get("folderName");
       const path = formData.get("path");
@@ -99,7 +161,7 @@ export async function action({ request }: Route.ActionArgs): Promise<FileActionR
       if (typeof folderName === "string") folderData.set("name", folderName);
       if (typeof path === "string") folderData.set("path", path);
 
-      const response = await fetch(`${filesApiUrl}folders/`, {
+      const response = await fetchApi(request, `${filesApiUrl}folders/`, {
         method: "POST",
         body: folderData,
       });
@@ -113,7 +175,7 @@ export async function action({ request }: Route.ActionArgs): Promise<FileActionR
         return { intent, error: "No se indicó qué archivo eliminar." };
       }
 
-      const response = await fetch(`${filesApiUrl}${encodeStoragePath(filename)}/`, {
+      const response = await fetchApi(request, `${filesApiUrl}${encodeStoragePath(filename)}/`, {
         method: "DELETE",
       });
       if (!response.ok) return { intent, error: await responseError(response) };
@@ -122,6 +184,7 @@ export async function action({ request }: Route.ActionArgs): Promise<FileActionR
 
     return { error: "La acción solicitada no es válida." };
   } catch (error) {
+    if (error instanceof Response) throw error;
     return {
       intent: typeof intent === "string" ? intent : undefined,
       error: error instanceof Error ? error.message : "No se pudo completar la operación.",
@@ -141,19 +204,30 @@ function formatBytes(bytes: number) {
   return `${size.toFixed(size < 10 ? 1 : 0)} ${units[unitIndex]}`;
 }
 
+function getPreviewKind(filename: string): FilePreview["kind"] | null {
+  const extension = filename.split(".").at(-1)?.toLowerCase() ?? "";
+  if (imageExtensions.has(extension)) return "image";
+  if (videoExtensions.has(extension)) return "video";
+  return null;
+}
+
 export function meta() {
   return [{ title: "Archivos | Phishers Monitor" }];
 }
 
 export default function FilesPage({ loaderData }: Route.ComponentProps) {
-  const { path, folders, files, downloadBaseUrl } = loaderData;
+  const { path, folders, files } = loaderData;
   const fetcher = useFetcher<FileActionResult>();
   const revalidator = useRevalidator();
   const fileInput = useRef<HTMLInputElement>(null);
+  const previewDialog = useRef<HTMLDialogElement>(null);
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState(false);
   const [folderFormOpen, setFolderFormOpen] = useState(false);
-  const busy = fetcher.state !== "idle";
+  const [transfer, setTransfer] = useState<TransferProgress | null>(null);
+  const [transferMessage, setTransferMessage] = useState<{ message?: string; error?: string } | null>(null);
+  const [preview, setPreview] = useState<FilePreview | null>(null);
+  const busy = fetcher.state !== "idle" || transfer !== null;
   const totalBytes = files.reduce((total, file) => total + file.size, 0);
   const searchTerm = search.trim().toLocaleLowerCase();
   const visibleFolders = folders.filter((folder) =>
@@ -169,30 +243,101 @@ export default function FilesPage({ loaderData }: Route.ComponentProps) {
     }
   }, [fetcher.data, fetcher.state]);
 
-  function submitFiles(selectedFiles: FileList | File[]) {
-    if (selectedFiles.length === 0) return;
-    const formData = new FormData();
-    formData.set("intent", "upload");
-    formData.set("path", path);
-    Array.from(selectedFiles).forEach((file) => formData.append("files", file));
-    fetcher.submit(formData, { method: "post", encType: "multipart/form-data" });
+  useEffect(() => {
+    const dialog = previewDialog.current;
+    if (preview && dialog && !dialog.open) dialog.showModal();
+    if (!preview && dialog?.open) dialog.close();
+  }, [preview]);
+
+  async function submitFiles(selectedFiles: FileList | File[]) {
+    if (selectedFiles.length === 0 || busy) return;
+    const uploads = Array.from(selectedFiles);
+    setTransferMessage(null);
     if (fileInput.current) fileInput.current.value = "";
+    let uploadAttempted = false;
+
+    try {
+      for (const [index, file] of uploads.entries()) {
+        const label = `${file.name} (${index + 1}/${uploads.length})`;
+        setTransfer({ phase: "Calculando MD5", filename: label, progress: 0 });
+        const md5 = await calculateMd5(file, (progress) => {
+          setTransfer({ phase: "Calculando MD5", filename: label, progress: Math.round(progress / 10) });
+        });
+
+        uploadAttempted = true;
+        const uploaded = await sendFileUpload(
+          file,
+          path,
+          md5,
+          (progress) => setTransfer({
+            phase: "Subiendo",
+            filename: label,
+            progress: 10 + Math.round(progress * 90),
+          }),
+          () => setTransfer({ phase: "Verificando en Django", filename: label, progress: 100 }),
+        );
+        if (uploaded.md5.toLowerCase() !== md5) {
+          throw new Error(`La integridad de ${file.name} no coincide.`);
+        }
+      }
+
+      setTransferMessage({
+        message: uploads.length === 1
+          ? `Se ha subido y verificado ${uploads[0].name}.`
+          : `Se han subido y verificado ${uploads.length} archivos.`,
+      });
+    } catch (error) {
+      setTransferMessage({
+        error: error instanceof Error ? error.message : "No se pudo completar la transferencia.",
+      });
+    } finally {
+      if (uploadAttempted) revalidator.revalidate();
+      setTransfer(null);
+    }
+  }
+
+  async function downloadStoredFile(file: StoredFile) {
+    if (busy) return;
+    setTransferMessage(null);
+    setTransfer({ phase: "Descargando", filename: file.name, progress: 0 });
+
+    try {
+      const downloaded = await requestFileDownload(file.path, (progress) => {
+        setTransfer({ phase: "Descargando", filename: file.name, progress: Math.round(progress * 100) });
+      });
+      setTransfer({ phase: "Verificando MD5", filename: file.name, progress: 100 });
+      const md5 = await calculateMd5(downloaded.blob, (progress) => {
+        setTransfer({ phase: "Verificando MD5", filename: file.name, progress });
+      });
+      if (md5 !== downloaded.md5.toLowerCase()) {
+        throw new Error(`La integridad de ${file.name} no coincide; no se descargó.`);
+      }
+
+      const objectUrl = URL.createObjectURL(downloaded.blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = file.name;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      setTransferMessage({ message: `Descarga verificada: ${file.name}.` });
+    } catch (error) {
+      setTransferMessage({
+        error: error instanceof Error ? error.message : "No se pudo completar la descarga.",
+      });
+    } finally {
+      setTransfer(null);
+    }
   }
 
   return (
     <main className="files-page">
       <header className="files-header">
+        <SidebarNavigation />
         <Link className="files-brand" to="/" aria-label="Phishers Monitor, inicio">
           <span className="files-brand-mark" aria-hidden="true">PM</span>
           <span>Phishers Monitor</span>
         </Link>
-        <div className="header-tools">
-          <nav className="app-nav" aria-label="Navegación principal">
-            <Link to="/">Usuarios</Link>
-            <Link to="/files" aria-current="page">Archivos</Link>
-          </nav>
-          <span className="files-connection"><span aria-hidden="true" /> Almacenamiento local</span>
-        </div>
+        <span className="files-connection"><span aria-hidden="true" /> Almacenamiento local</span>
       </header>
 
       <section className="files-intro" aria-labelledby="files-title">
@@ -313,6 +458,21 @@ export default function FilesPage({ loaderData }: Route.ComponentProps) {
 
         {fetcher.data?.error && <p className="files-message is-error" role="alert">{fetcher.data.error}</p>}
         {fetcher.data?.message && <p className="files-message is-success" role="status">{fetcher.data.message}</p>}
+        {transferMessage?.error && <p className="files-message is-error" role="alert">{transferMessage.error}</p>}
+        {transferMessage?.message && <p className="files-message is-success" role="status">{transferMessage.message}</p>}
+        {transfer && (
+          <div className="files-transfer" role="status" aria-live="polite">
+            <div className="files-transfer-heading">
+              <span>{transfer.phase}: {transfer.filename}</span>
+              <span>{transfer.progress}%</span>
+            </div>
+            <progress
+              max={100}
+              value={transfer.progress}
+              aria-label={`${transfer.phase}: ${transfer.filename}`}
+            />
+          </div>
+        )}
 
         <div className="files-list" aria-label="Archivos guardados">
           <div className="files-list-head" aria-hidden="true">
@@ -355,9 +515,17 @@ export default function FilesPage({ loaderData }: Route.ComponentProps) {
               </time>
               <span className="files-size">{formatBytes(file.size)}</span>
               <div className="files-actions">
-                <a href={`${downloadBaseUrl}/phishers/files/${encodeStoragePath(file.path)}/download/`}>
+                {getPreviewKind(file.name) && (
+                  <button
+                    type="button"
+                    onClick={() => setPreview({ file, kind: getPreviewKind(file.name)! })}
+                  >
+                    Vista previa
+                  </button>
+                )}
+                <button type="button" onClick={() => void downloadStoredFile(file)} disabled={busy}>
                   Descargar
-                </a>
+                </button>
                 <fetcher.Form
                   method="post"
                   onSubmit={(event) => {
@@ -379,6 +547,39 @@ export default function FilesPage({ loaderData }: Route.ComponentProps) {
       <footer className="files-footer">
         Los archivos se guardan en <code>django_backend/media</code>.
       </footer>
+
+      <dialog
+        ref={previewDialog}
+        className="files-preview-dialog"
+        aria-labelledby="preview-title"
+        onClose={() => setPreview(null)}
+      >
+        {preview && (
+          <>
+            <header className="files-preview-header">
+              <h2 id="preview-title" title={preview.file.name}>{preview.file.name}</h2>
+              <button type="button" onClick={() => previewDialog.current?.close()} aria-label="Cerrar vista previa">
+                Cerrar
+              </button>
+            </header>
+            <div className="files-preview-content">
+              {preview.kind === "image" ? (
+                <img
+                  src={`/download/${encodeStoragePath(preview.file.path)}?preview=1`}
+                  alt={preview.file.name}
+                />
+              ) : (
+                <video
+                  src={`/download/${encodeStoragePath(preview.file.path)}?preview=1`}
+                  controls
+                  preload="metadata"
+                  aria-label={preview.file.name}
+                />
+              )}
+            </div>
+          </>
+        )}
+      </dialog>
     </main>
   );
 }

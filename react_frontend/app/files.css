@@ -460,6 +460,37 @@
   background: #e4f0e9;
 }
 
+.files-transfer {
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid #dce5df;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.files-transfer-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #245c49;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.files-transfer-heading span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-transfer progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  accent-color: #337b5c;
+}
+
 .files-empty {
   margin: 0;
   padding: 30px 12px;
@@ -479,6 +510,76 @@
 
 .files-footer code {
   color: #245c49;
+}
+
+.files-preview-dialog {
+  width: min(920px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #43524b;
+  border-radius: 8px;
+  color: #f4f7f5;
+  background: #17211d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+
+.files-preview-dialog::backdrop {
+  background: rgba(10, 17, 14, 0.78);
+}
+
+.files-preview-header {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid #43524b;
+}
+
+.files-preview-header h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-preview-header button {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid #607067;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.files-preview-content {
+  display: grid;
+  min-height: 180px;
+  max-height: calc(100dvh - 88px);
+  place-items: center;
+  overflow: auto;
+  background: #0c100e;
+}
+
+.files-preview-content img,
+.files-preview-content video {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 90px);
+  object-fit: contain;
+}
+
+.files-preview-content video {
+  width: 100%;
+  background: #000;
 }
 
 .files-error-page .files-brand {

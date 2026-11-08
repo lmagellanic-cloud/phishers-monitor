@@ -1,5 +1,7 @@
+import hashlib
 import tempfile
 
+from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
@@ -13,10 +15,58 @@ class LocalFilesApiTests(TestCase):
         self.storage_override = override_settings(MEDIA_ROOT=self.media_directory.name)
         self.storage_override.enable()
         self.client = APIClient()
+        self.user = User.objects.create_user(username="api-user", password="test-pass")
+        self.client.force_authenticate(user=self.user)
 
     def tearDown(self):
         self.storage_override.disable()
         self.media_directory.cleanup()
+
+    def test_api_endpoints_require_authentication(self):
+        anonymous_client = APIClient()
+        endpoints = [
+            ("get", reverse("user-list")),
+            ("get", reverse("group-list")),
+            ("get", reverse("files")),
+            ("post", reverse("files")),
+            ("post", reverse("create_file_folder")),
+            ("get", reverse("monitored_users")),
+            ("get", reverse("download_file", args=["missing.txt"])),
+            ("delete", reverse("delete_file", args=["missing.txt"])),
+        ]
+
+        for method, url in endpoints:
+            with self.subTest(method=method, url=url):
+                response = getattr(anonymous_client, method)(url)
+                self.assertEqual(response.status_code, 401)
+
+    def test_token_endpoint_authenticates_user(self):
+        response = self.client.post(
+            reverse("api_token_auth"),
+            {"username": "api-user", "password": "test-pass"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.data)
+
+    def test_token_logout_revokes_token(self):
+        token_response = APIClient().post(
+            reverse("api_token_auth"),
+            {"username": "api-user", "password": "test-pass"},
+            format="json",
+        )
+        token_client = APIClient(
+            HTTP_AUTHORIZATION=f"Token {token_response.data['token']}"
+        )
+
+        authenticated_response = token_client.get(reverse("files"))
+        logout_response = token_client.post(reverse("api_token_logout"))
+        files_response = token_client.get(reverse("files"))
+
+        self.assertEqual(authenticated_response.status_code, 200)
+        self.assertEqual(logout_response.status_code, 204)
+        self.assertEqual(files_response.status_code, 401)
 
     def test_upload_list_download_and_delete_file(self):
         upload_response = self.client.post(
@@ -27,6 +77,10 @@ class LocalFilesApiTests(TestCase):
 
         self.assertEqual(upload_response.status_code, 201)
         filename = upload_response.data["name"]
+        self.assertEqual(
+            upload_response.data["md5"],
+            hashlib.md5(b"local cloud content").hexdigest(),
+        )
 
         list_response = self.client.get(reverse("files"))
         self.assertEqual(list_response.status_code, 200)
@@ -34,6 +88,9 @@ class LocalFilesApiTests(TestCase):
 
         download_response = self.client.get(reverse("download_file", args=[filename]))
         self.assertEqual(download_response.status_code, 200)
+        self.assertEqual(
+            download_response["X-Content-MD5"], upload_response.data["md5"]
+        )
         self.assertEqual(
             b"".join(download_response.streaming_content), b"local cloud content"
         )
@@ -60,6 +117,9 @@ class LocalFilesApiTests(TestCase):
         )
         self.assertEqual(upload_response.status_code, 201)
         self.assertEqual(upload_response.data["name"], "reports/summary.txt")
+        self.assertEqual(
+            upload_response.data["md5"], hashlib.md5(b"nested content").hexdigest()
+        )
 
         root_response = self.client.get(reverse("files"))
         self.assertEqual(root_response.data["folders"][0]["path"], "reports")
@@ -74,6 +134,9 @@ class LocalFilesApiTests(TestCase):
             reverse("download_file", args=["reports/summary.txt"])
         )
         self.assertEqual(download_response.status_code, 200)
+        self.assertEqual(
+            download_response["X-Content-MD5"], upload_response.data["md5"]
+        )
         self.assertEqual(
             b"".join(download_response.streaming_content), b"nested content"
         )

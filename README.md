@@ -1,76 +1,85 @@
-# phishers-monitor
-Web platform that facilitates the visual analysis of user behavior in interactive systems to determine their identity, through the provision of JSON files.
+# Phishers Monitor
 
-### Prerequisites
+A web platform for visually analyzing user behavior in interactive systems using JSON files.
 
-* [Python 3]
-* [Node.js]
-* [Yarn]
+The application consists of a Django REST API and a React Router interface.
 
-#### Unix distributions 
-It is recommended to use the "curl" command to install the prerequisites with the following commands:
-```
-$ sudo apt-get update
-$ sudo apt-get install python3.6
-$ sudo apt install curl
-$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-$ sudo apt-get install -y nodejs
-$ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-$ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-$ sudo apt-get install yarn
-$ sudo apt-get install python3-pip
-```
+## Requirements
 
-## Getting Started
+- Python 3.13 or a version compatible with `requirements.txt`.
+- Node.js 24 for local frontend development.
+- Docker Compose for the integrated deployment.
 
-#### Unix distributions 
+## Local Development
 
-Open the terminal and clone the repository with the following commands:
-```
-$ git clone https://github.com/lmagellanic-cloud/phishers-monitor.git
-$ cd phishers-monitor/
+From the repository root, create a virtual environment and install the Django dependencies:
+
+```sh
+python3 -m venv venv
+. venv/bin/activate
+pip install -r requirements.txt
 ```
 
-File "monitoredUsers.db" in TFG/databases/monitoredUsers/ is needed to run the Flask server:
-```
-$ touch TFG/databases/monitoredUsers/monitoredUsers.db 
+Set a local secret key and prepare the database:
+
+```sh
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')"
+python django_backend/manage.py migrate
+python django_backend/manage.py createsuperuser
 ```
 
-Install the necessary dependencies for the Flask server:
-```
-$ pip3 install -r TFG/requirements.txt
+In the same terminal, start Django with development mode enabled so its static files are served:
+
+```sh
+DJANGO_DEBUG=true python django_backend/manage.py runserver 8080
 ```
 
-Generate JSON files with the script generateTotallyRandomJSON.py and add them to the database (You can also use generateDesiredJSON.py file):
-```
-$ python3 TFG/generateTotallyRandomJSON.py 
-$ python3 TFG/create_and_insert_JSON_to_DB.py 
+In another terminal, install and start React Router:
+
+```sh
+cd react_frontend
+npm ci
+DJANGO_API_TARGET=http://localhost:8080 npm run dev
 ```
 
-Install the necessary dependencies for the React server:
-```
-$ cd react_frontend/
-$ npm install
+Open <http://localhost:3000> and sign in with the Django user created above. To generate sample data, run `python django_backend/manage.py populate_database` from the repository root.
+
+## Docker Compose
+
+The deployment runs Django, React Router, and Traefik. The application is available on port 80; the database and uploaded files persist in Docker volumes. Django static assets are collected during the image build and served by WhiteNoise.
+
+```sh
+cp .env.example .env
 ```
 
-And run the Flask server (localhost:5000) and React server (localhost:3000):
-Reloads the page localhost:5000 if it doesn't work at the first attempt.
+Edit `.env` and replace `DJANGO_SECRET_KEY` and `SESSION_SECRET` with independent random values. Then start the services:
+
+```sh
+docker compose up --build
 ```
-$ chmod 700 TFG/runTFG.sh 
-$ cd TFG/ 
-$ ./runTFG.sh
+
+Open <http://localhost>. To create a user account, run:
+
+```sh
+docker compose exec django python manage.py createsuperuser
 ```
-Open a new terminal in phishers-monitor/:
-```
-$ cd react_frontend/
-$ npm run dev
-```
-Open http://localhost:3000 for the dashboard. The development server uses this port because the Flask API only allows this origin through CORS.
+
+Stop the services with `docker compose down`. To also delete the persistent database and uploaded files, run `docker compose down --volumes`.
+
+## Useful Commands
+
+Run `./django-shell` to open the interactive project CLI. It includes commands to list scripts, generate sample JSON, populate or empty the database, and open the Django shell. You can also run `python django_backend/manage.py <command>` directly.
+
+In `react_frontend`, run `npm run typecheck` to check types and `npm run build` to create a production build.
+
+## Project Structure
+
+- `django_backend/`: Django configuration, API, migrations, management commands, and local `media/` storage.
+- `react_frontend/`: React Router application, routes, styles, and Vite configuration.
+- `docker-compose.yml`: Django, React Router, and Traefik services.
+- `django-shell`: launcher for the interactive CLI.
+- `requirements.txt` and `requirements-dev.txt`: Python dependencies.
 
 ## License
 
-## Django CLI
-
-From the repository root, run `./django-shell` to open the interactive CLI without activating the virtual environment. Use `launchers` to list scripts, `run generateTotallyRandomJSON.py` to generate JSON files in `django_backend/media`, or `shell` to open the Django shell.
-
-This project is licensed under the Apache License 2.0 (Version 2.0, January 2004)- see the [LICENSE.md](LICENSE.md) file for details
+This project is distributed under the Apache License 2.0. See [LICENSE](LICENSE).

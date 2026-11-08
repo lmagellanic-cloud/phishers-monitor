@@ -1,3 +1,4 @@
+import hashlib
 import posixpath
 from pathlib import Path
 
@@ -5,8 +6,7 @@ from django.contrib.auth.models import Group, User
 from django.core.files.storage import default_storage
 from django.http import FileResponse
 from django.shortcuts import redirect
-from rest_framework import permissions, status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -29,7 +29,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all().order_by("-date_joined")
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -39,13 +38,17 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     queryset = Group.objects.all().order_by("name")
     serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class MonitoredUsers(viewsets.ModelViewSet):
     queryset = MonitoredUser.objects.all()
     serializer_class = MonitoredUserSerializer
-    permission_classes = []  # TODO: Migrado Flask, activar autenticación
+
+
+class TokenLogoutView(APIView):
+    def post(self, request):
+        request.auth.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def _clean_media_path(value):
@@ -71,9 +74,15 @@ def _is_media_file(path):
     return filename in filenames
 
 
-class FilesView(APIView):
-    permission_classes = [AllowAny]
+def _md5_for_storage(path):
+    digest = hashlib.md5()
+    with default_storage.open(path, "rb") as stored_file:
+        for chunk in iter(lambda: stored_file.read(64 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
+
+class FilesView(APIView):
     def get(self, request):
         try:
             directory = _clean_media_path(request.query_params.get("path", ""))
@@ -121,12 +130,13 @@ class FilesView(APIView):
         filename = default_storage.save(
             posixpath.join(directory, uploaded_file.name), uploaded_file
         )
-        return Response({"name": filename}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"name": filename, "md5": _md5_for_storage(filename)},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class FileFolderCreateView(APIView):
-    permission_classes = [AllowAny]
-
     def post(self, request):
         try:
             parent = _clean_media_path(request.data.get("path", ""))
@@ -172,8 +182,6 @@ class FileFolderCreateView(APIView):
 
 
 class FileDownloadView(APIView):
-    permission_classes = [AllowAny]
-
     def get(self, request, filename):
         try:
             filename = _clean_media_path(filename)
@@ -185,14 +193,14 @@ class FileDownloadView(APIView):
                 {"detail": "El fichero no existe."}, status=status.HTTP_404_NOT_FOUND
             )
 
-        return FileResponse(
+        response = FileResponse(
             default_storage.open(filename, "rb"), as_attachment=True, filename=filename
         )
+        response["X-Content-MD5"] = _md5_for_storage(filename)
+        return response
 
 
 class FileDeleteView(APIView):
-    permission_classes = [AllowAny]
-
     def delete(self, request, filename):
         try:
             filename = _clean_media_path(filename)

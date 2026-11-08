@@ -1,0 +1,66 @@
+.video-page .page-intro {
+  padding-bottom: 30px;
+}
+
+.video-player-section {
+  display: grid;
+  gap: 10px;
+  padding-top: 22px;
+  border-top: 2px solid #172522;
+}
+
+.video-player-section > label {
+  color: #687873;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.video-player-section select {
+  width: min(100%, 620px);
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #dce5df;
+  border-radius: 5px;
+  color: #172522;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+.video-player-frame {
+  display: grid;
+  min-height: 260px;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px solid #35443d;
+  border-radius: 6px;
+  background: #101714;
+}
+
+.video-now-playing {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: #d3ded7;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-player-frame video {
+  display: block;
+  width: min(100%, 960px);
+  max-height: 68vh;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .video-player-frame {
+    min-height: 180px;
+    padding: 10px;
+  }
+}

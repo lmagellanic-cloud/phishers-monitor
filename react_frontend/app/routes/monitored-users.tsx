@@ -1,5 +1,7 @@
 import { isRouteErrorResponse, Link, useRevalidator } from "react-router";
 import type { Route } from "./+types/monitored-users";
+import { apiBaseUrl, fetchApi } from "../auth.server";
+import { SidebarNavigation } from "../components/sidebar-navigation";
 import "../monitored-users.css";
 
 type MonitoredUser = {
@@ -14,11 +16,6 @@ type MonitoredUsersResponse = {
   results: MonitoredUser[];
 };
 
-const apiBaseUrl = (process.env.DJANGO_API_TARGET ?? "http://localhost:8080").replace(
-  /\/+$/,
-  "",
-);
-
 export async function loader({ request }: Route.LoaderArgs) {
   const requestUrl = new URL(request.url);
   const requestedPage = Number.parseInt(requestUrl.searchParams.get("page") ?? "1", 10);
@@ -29,7 +26,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     apiUrl.searchParams.set("page", String(page));
   }
 
-  const response = await fetch(apiUrl);
+  const response = await fetchApi(request, apiUrl);
 
   if (!response.ok) {
     throw new Response("No se pudo cargar la lista desde Django REST.", {
@@ -59,17 +56,12 @@ export default function MonitoredUsersPage({ loaderData }: Route.ComponentProps)
   return (
     <main className="monitor-page">
       <header className="page-header">
+        <SidebarNavigation />
         <a className="brand" href="/" aria-label="Phishers Monitor, inicio">
           <span className="brand-mark" aria-hidden="true">PM</span>
           <span>Phishers Monitor</span>
         </a>
-        <div className="header-tools">
-          <nav className="app-nav" aria-label="Navegación principal">
-            <Link to="/" aria-current="page">Usuarios</Link>
-            <Link to="/files">Archivos</Link>
-          </nav>
-          <span className="connection-state"><span aria-hidden="true" /> Django REST</span>
-        </div>
+        <span className="connection-state"><span aria-hidden="true" /> Django REST</span>
       </header>
 
       <section className="page-intro" aria-labelledby="page-title">

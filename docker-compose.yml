@@ -1,0 +1,65 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - web
+
+  django:
+    build:
+      context: .
+      dockerfile: django_backend/Dockerfile
+    environment:
+      DJANGO_DEBUG: "false"
+      DJANGO_ALLOWED_HOSTS: "${APP_HOST:-localhost},django,127.0.0.1"
+      DJANGO_DB_PATH: /data/db.sqlite3
+      SECRET_KEY: "${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}"
+    volumes:
+      - django_db:/data
+      - django_media:/app/media
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.django.rule=Host(`${APP_HOST:-localhost}`) && (PathPrefix(`/phishers`) || PathPrefix(`/media`) || PathPrefix(`/static`) || PathPrefix(`/admin`))
+      - traefik.http.routers.django.priority=100
+      - traefik.http.routers.django.entrypoints=web
+      - traefik.http.services.django.loadbalancer.server.port=8000
+    networks:
+      - web
+
+  react:
+    build:
+      context: ./react_frontend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      DJANGO_API_TARGET: http://django:8000
+      SESSION_SECRET: "${SESSION_SECRET:?Set SESSION_SECRET in .env}"
+    depends_on:
+      - django
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.react.rule=Host(`${APP_HOST:-localhost}`)
+      - traefik.http.routers.react.priority=1
+      - traefik.http.routers.react.entrypoints=web
+      - traefik.http.services.react.loadbalancer.server.port=3000
+    networks:
+      - web
+
+networks:
+  web:
+
+volumes:
+  django_db:
+  django_media:

@@ -11,7 +11,7 @@ export default defineConfig({
       ignored: ["**/src-tauri/**"],
     },
     proxy: {
-      "/phishers/files": {
+      "/api/files": {
         target: process.env.DJANGO_API_TARGET || "http://localhost:8080",
         changeOrigin: true,
       },

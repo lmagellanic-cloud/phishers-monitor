@@ -4,7 +4,7 @@ import { apiBaseUrl, destroySession, fetchApi, getSession } from "../auth.server
 
 export async function action({ request }: Route.ActionArgs) {
   await Promise.allSettled([
-    fetchApi(request, `${apiBaseUrl}/phishers/auth/logout/`, { method: "POST" }),
+    fetchApi(request, `${apiBaseUrl}/api/auth/logout/`, { method: "POST" }),
   ]);
   const session = await getSession(request.headers.get("Cookie"));
   return redirect("/login", {

@@ -28,7 +28,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   while (pendingFolders.length > 0) {
     const path = pendingFolders.shift()!;
-    const apiUrl = new URL(`${apiBaseUrl}/phishers/files/`);
+    const apiUrl = new URL(`${apiBaseUrl}/api/files/`);
     if (path) apiUrl.searchParams.set("path", path);
 
     const response = await fetchApi(request, apiUrl);

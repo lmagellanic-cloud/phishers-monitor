@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { action as loginAction } from "../../app/routes/login";
 import { loader as monitoredUsersLoader } from "../../app/routes/monitored-users";
+import { loader as usersLoader } from "../../app/routes/users";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -55,7 +56,7 @@ describe("authenticated monitored-user flow", () => {
       body: JSON.stringify({ username: "analyst", password: "secret" }),
     });
     expect(fetchMock.mock.calls[1][0]).toEqual(
-      new URL("http://localhost:8080/phishers/monitored_users/?page=2"),
+      new URL("http://localhost:8080/api/monitored_users/?page=2"),
     );
     expect(new Headers(fetchMock.mock.calls[1][1]?.headers).get("Authorization")).toBe(
       "Token test-token",
@@ -78,5 +79,61 @@ describe("authenticated monitored-user flow", () => {
 
     expect(result).toEqual({ error: "Introduce tu usuario y contraseña." });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("loads Django users from the UserViewSet endpoint", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(Response.json({ token: "test-token" }))
+      .mockResolvedValueOnce(Response.json({
+        count: 1,
+        next: null,
+        previous: null,
+        results: [{
+          url: "http://localhost:8080/api/users/1/",
+          username: "analyst",
+          email: "analyst@example.test",
+          groups: [],
+        }],
+      }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const loginData = new FormData();
+    loginData.set("username", "analyst");
+    loginData.set("password", "secret");
+    const loginResponse = await loginAction({
+      request: new Request("http://localhost/login", {
+        method: "POST",
+        body: loginData,
+      }),
+    } as Parameters<typeof loginAction>[0]);
+
+    if (!(loginResponse instanceof Response)) throw new Error("Expected a redirect response");
+    const cookie = loginResponse.headers.get("Set-Cookie")?.split(";")[0];
+    if (!cookie) throw new Error("Expected the login action to set a session cookie");
+
+    const result = await usersLoader({
+      request: new Request("http://localhost/users", {
+        headers: { Cookie: cookie },
+      }),
+    } as Parameters<typeof usersLoader>[0]);
+
+    expect(result).toEqual({
+      users: [{
+        url: "http://localhost:8080/api/users/1/",
+        username: "analyst",
+        email: "analyst@example.test",
+        groups: [],
+      }],
+      count: 1,
+      page: 1,
+      hasNext: false,
+      hasPrevious: false,
+    });
+    expect(fetchMock.mock.calls[1][0]).toEqual(
+      new URL("http://localhost:8080/api/users/"),
+    );
+    expect(new Headers(fetchMock.mock.calls[1][1]?.headers).get("Authorization")).toBe(
+      "Token test-token",
+    );
   });
 });

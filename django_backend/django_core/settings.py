@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent  # ./django_backend
 PROYECT_ROOT = BASE_DIR / ".."
-MEDIA_ROOT = BASE_DIR.joinpath("media")  # ./django_backend/media
+MEDIA_ROOT = PROYECT_ROOT / "bind-mounts" / "media"  # ./bind-mounts/media
 MEDIA_URL = "/media/"
 
 # Load .env
@@ -170,3 +170,28 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+
+# Logging
+LOGGING_DIR = PROYECT_ROOT / "bind-mounts" / "logs"
+LOGGING_DIR.mkdir(parents=True, exist_ok=True)
+
+LOGGING_DEBUG_FILE = LOGGING_DIR / "debug.log"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": str(LOGGING_DEBUG_FILE.absolute().resolve()),
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}

@@ -18,7 +18,7 @@ export async function action({ request }: Route.ActionArgs) {
   uploadData.append("file", file, file.name);
   if (typeof path === "string") uploadData.append("path", path);
 
-  const response = await fetchApi(request, `${apiBaseUrl}/phishers/files/`, {
+  const response = await fetchApi(request, `${apiBaseUrl}/api/files/`, {
     method: "POST",
     body: uploadData,
   });

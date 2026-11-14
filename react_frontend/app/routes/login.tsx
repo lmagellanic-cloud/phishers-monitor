@@ -37,7 +37,7 @@ export async function action({ request }: Route.ActionArgs): Promise<LoginAction
 
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl}/phishers/auth/token/`, {
+    response = await fetch(`${apiBaseUrl}/api/auth/token/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: username.trim(), password }),

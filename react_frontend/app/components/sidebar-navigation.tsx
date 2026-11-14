@@ -3,13 +3,20 @@ import { Form, Link, useLocation } from "react-router";
 
 const navigationItems = [
   { label: "Usuarios", to: "/" },
-  { label: "Archivos", to: "/files" },
-  { label: "Vídeos", to: "/videos" },
-  { label: "Galería", to: "/gallery" },
+  { label: "Usuarios de Django", to: "/users" },
+  {
+    label: "Archivos",
+    children: [
+      { label: "Todos los archivos", to: "/files" },
+      { label: "Vídeos", to: "/videos" },
+      { label: "Galería", to: "/gallery" },
+    ],
+  },
 ];
 
 export function SidebarNavigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const { pathname } = useLocation();
 
   return (
@@ -52,14 +59,54 @@ export function SidebarNavigation() {
             </div>
             <nav className="sidebar-links">
               {navigationItems.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  aria-current={pathname === item.to ? "page" : undefined}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                item.children ? (
+                  <div className="sidebar-nav-group" key={item.label}>
+                    <button
+                      className={`sidebar-nav-group-toggle${item.children.some((child) =>
+                        pathname === child.to || pathname.startsWith(`${child.to}/`)
+                      ) ? " is-active" : ""}`}
+                      type="button"
+                      aria-expanded={expandedItem === item.label}
+                      aria-controls="sidebar-files-submenu"
+                      onClick={() => setExpandedItem((expanded) =>
+                        expanded === item.label ? null : item.label
+                      )}
+                    >
+                      {item.label}
+                      <span
+                        className={`sidebar-nav-chevron${expandedItem === item.label ? " is-expanded" : ""}`}
+                        aria-hidden="true"
+                      >
+                        ⌄
+                      </span>
+                    </button>
+                    <div
+                      className="sidebar-submenu"
+                      id="sidebar-files-submenu"
+                      hidden={expandedItem !== item.label}
+                    >
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.to}
+                          to={child.to}
+                          aria-current={pathname === child.to ? "page" : undefined}
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    aria-current={pathname === item.to ? "page" : undefined}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
               ))}
             </nav>
             <div className="sidebar-footer">

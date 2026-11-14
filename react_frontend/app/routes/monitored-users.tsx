@@ -20,7 +20,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const requestUrl = new URL(request.url);
   const requestedPage = Number.parseInt(requestUrl.searchParams.get("page") ?? "1", 10);
   const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const apiUrl = new URL(`${apiBaseUrl}/phishers/monitored_users/`);
+  const apiUrl = new URL(`${apiBaseUrl}/api/monitored_users/`);
 
   if (page > 1) {
     apiUrl.searchParams.set("page", String(page));
@@ -137,7 +137,7 @@ export default function MonitoredUsersPage({ loaderData }: Route.ComponentProps)
         </nav>
       </section>
 
-      <footer className="page-footer">Fuente de datos <code>/phishers/monitored_users/</code></footer>
+      <footer className="page-footer">Fuente de datos <code>/api/monitored_users/</code></footer>
     </main>
   );
 }

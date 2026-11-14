@@ -49,7 +49,7 @@ type FilePreview = {
 const imageExtensions = new Set(["avif", "gif", "jpeg", "jpg", "png", "webp"]);
 const videoExtensions = new Set(["mp4", "ogg", "webm"]);
 
-const filesApiUrl = `${apiBaseUrl}/phishers/files/`;
+const filesApiUrl = `${apiBaseUrl}/api/files/`;
 
 function encodeStoragePath(path: string) {
   return path.split("/").map(encodeURIComponent).join("/");

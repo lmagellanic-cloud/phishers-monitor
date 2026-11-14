@@ -32,7 +32,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const range = request.headers.get("Range");
   const response = await fetchApi(
     request,
-    `${apiBaseUrl}/phishers/files/${filename}/download/`,
+    `${apiBaseUrl}/api/files/${filename}/download/`,
     range ? { headers: { Range: range } } : {},
   );
   const headers = new Headers();

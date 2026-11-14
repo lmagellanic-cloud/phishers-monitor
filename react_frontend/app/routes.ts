@@ -6,6 +6,7 @@ export default [
   route("download/*", "./routes/download.ts"),
   route("upload", "./routes/upload.ts"),
   index("./routes/monitored-users.tsx"),
+  route("users", "./routes/users.tsx"),
   route("files", "./routes/files.tsx"),
   route("videos", "./routes/videos.tsx"),
   route("gallery", "./routes/gallery.tsx"),

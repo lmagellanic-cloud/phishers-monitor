@@ -1,8 +1,8 @@
 # Project's file
 .vscode/
 bind-mounts/db.sqlite3
-bind-mounts/compose/beszel_data
-django_backend/media/
+bind-mounts/compose/beszel/*
+bind-mounts/media/
 cmd2_history.dat
 
 # Byte-compiled / optimized / DLL files

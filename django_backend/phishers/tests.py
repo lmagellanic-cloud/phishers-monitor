@@ -22,6 +22,27 @@ class LocalFilesApiTests(TestCase):
         self.storage_override.disable()
         self.media_directory.cleanup()
 
+    def test_phishers_routes_are_mounted_under_api_prefix(self):
+        routes = [
+            ("user-list", []),
+            ("user-detail", [1]),
+            ("group-list", []),
+            ("group-detail", [1]),
+            ("monitored_users-list", []),
+            ("monitored_users-detail", [1]),
+            ("files", []),
+            ("api_token_auth", []),
+            ("api_token_logout", []),
+            ("create_file_folder", []),
+            ("download_file", ["missing.txt"]),
+            ("delete_file", ["missing.txt"]),
+            ("monitored_users", []),
+        ]
+
+        for route_name, args in routes:
+            with self.subTest(route_name=route_name):
+                self.assertTrue(reverse(route_name, args=args).startswith("/api/"))
+
     def test_api_endpoints_require_authentication(self):
         anonymous_client = APIClient()
         endpoints = [

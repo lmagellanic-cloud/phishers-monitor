@@ -6,9 +6,6 @@ monitored users and Django accounts.
 The app requires signing in with a Django user account. Create one with
 `python django_backend/manage.py createsuperuser` before logging in.
 
-The app requires signing in with a Django user account. Create one with
-`python django_backend/manage.py createsuperuser` before logging in.
-
 ## Development
 
 Install dependencies and start the frontend:

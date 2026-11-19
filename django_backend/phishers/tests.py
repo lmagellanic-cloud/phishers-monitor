@@ -8,6 +8,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from phishers.models import MonitoredUser
+
 
 class LocalFilesApiTests(TestCase):
     def setUp(self):
@@ -30,6 +32,8 @@ class LocalFilesApiTests(TestCase):
             ("group-detail", [1]),
             ("monitored_users-list", []),
             ("monitored_users-detail", [1]),
+            ("monitored_user_details-list", []),
+            ("monitored_user_details-detail", [1]),
             ("files", []),
             ("api_token_auth", []),
             ("api_token_logout", []),
@@ -52,6 +56,7 @@ class LocalFilesApiTests(TestCase):
             ("post", reverse("files")),
             ("post", reverse("create_file_folder")),
             ("get", reverse("monitored_users")),
+            ("get", reverse("monitored_user_details-list")),
             ("get", reverse("download_file", args=["missing.txt"])),
             ("delete", reverse("delete_file", args=["missing.txt"])),
         ]
@@ -70,6 +75,30 @@ class LocalFilesApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("token", response.data)
+
+    def test_monitored_user_details_can_be_created_and_listed(self):
+        MonitoredUser.objects.create(username="monitored-user")
+
+        create_response = self.client.post(
+            reverse("monitored_user_details-list"),
+            {
+                "monitored_user": "monitored-user",
+                "name": "Ada",
+                "surname": "Lovelace",
+                "surname_2": "",
+                "phone": "+441234567890",
+                "is_phished": False,
+            },
+            format="json",
+        )
+
+        self.assertEqual(create_response.status_code, 201)
+        self.assertEqual(create_response.data["monitored_user"], "monitored-user")
+
+        list_response = self.client.get(reverse("monitored_user_details-list"))
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(list_response.data["count"], 1)
+        self.assertEqual(list_response.data["results"][0]["name"], "Ada")
 
     def test_token_logout_revokes_token(self):
         token_response = APIClient().post(

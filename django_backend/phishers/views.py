@@ -10,10 +10,11 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from phishers.models import MonitoredUser
+from phishers.models import MonitoredUser, MonitoredUserDetails
 from phishers.serializers import (
     GroupSerializer,
     MonitoredUserSerializer,
+    MonitoredUserDetailsSerializer,
     UserSerializer,
 )
 
@@ -43,6 +44,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 class MonitoredUsers(viewsets.ModelViewSet):
     queryset = MonitoredUser.objects.all()
     serializer_class = MonitoredUserSerializer
+
+
+class MonitoredUserDetailsViewSet(viewsets.ModelViewSet):
+    queryset = MonitoredUserDetails.objects.select_related("monitored_user").order_by(
+        "pk"
+    )
+    serializer_class = MonitoredUserDetailsSerializer
 
 
 class TokenLogoutView(APIView):

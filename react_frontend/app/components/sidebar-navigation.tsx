@@ -3,6 +3,7 @@ import { Form, Link, useLocation } from "react-router";
 
 const navigationItems = [
   { label: "Usuarios", to: "/" },
+  { label: "Detalles usuarios monitorizados", to: "/monitored-user-details" },
   { label: "Usuarios de Django", to: "/users" },
   {
     label: "Archivos",

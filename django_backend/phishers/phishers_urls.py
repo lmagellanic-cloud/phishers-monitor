@@ -8,6 +8,11 @@ router = routers.DefaultRouter()
 router.register(r"users", views.UserViewSet)
 router.register(r"groups", views.GroupViewSet)
 router.register(r"monitored_users", views.MonitoredUsers)
+router.register(
+    r"monitored_user_details",
+    views.MonitoredUserDetailsViewSet,
+    basename="monitored_user_details",
+)
 
 urlpatterns = [
     path("", include(router.urls)),

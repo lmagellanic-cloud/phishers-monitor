@@ -7,6 +7,7 @@ export default [
   route("upload", "./routes/upload.ts"),
   index("./routes/monitored-users.tsx"),
   route("monitored-user-details", "./routes/monitored-user-details.tsx"),
+  route("models/:modelName", "./routes/model-list.tsx"),
   route("users", "./routes/users.tsx"),
   route("files", "./routes/files.tsx"),
   route("videos", "./routes/videos.tsx"),

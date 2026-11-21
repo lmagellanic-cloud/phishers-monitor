@@ -8,7 +8,16 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from phishers.models import MonitoredUser
+from phishers.models import (
+    Canal,
+    MonitoredUser,
+    Timestamp,
+    Todo,
+    UserDetails,
+    UserReadBooks,
+    Video,
+    VideoCheckpoint,
+)
 
 
 class LocalFilesApiTests(TestCase):
@@ -17,7 +26,9 @@ class LocalFilesApiTests(TestCase):
         self.storage_override = override_settings(MEDIA_ROOT=self.media_directory.name)
         self.storage_override.enable()
         self.client = APIClient()
-        self.user = User.objects.create_user(username="api-user", password="test-pass")
+        self.user = User.objects.create_superuser(
+            username="api-user", password="test-pass"
+        )
         self.client.force_authenticate(user=self.user)
 
     def tearDown(self):
@@ -30,10 +41,17 @@ class LocalFilesApiTests(TestCase):
             ("user-detail", [1]),
             ("group-list", []),
             ("group-detail", [1]),
-            ("monitored_users-list", []),
-            ("monitored_users-detail", [1]),
+            ("monitoreduser-list", []),
+            ("monitoreduser-detail", [1]),
             ("monitored_user_details-list", []),
             ("monitored_user_details-detail", [1]),
+            ("user_details-list", []),
+            ("user_read_books-list", []),
+            ("timestamps-list", []),
+            ("todos-list", []),
+            ("canals-list", []),
+            ("videos-list", []),
+            ("video_checkpoints-list", []),
             ("files", []),
             ("api_token_auth", []),
             ("api_token_logout", []),
@@ -57,6 +75,13 @@ class LocalFilesApiTests(TestCase):
             ("post", reverse("create_file_folder")),
             ("get", reverse("monitored_users")),
             ("get", reverse("monitored_user_details-list")),
+            ("get", reverse("user_details-list")),
+            ("get", reverse("user_read_books-list")),
+            ("get", reverse("timestamps-list")),
+            ("get", reverse("todos-list")),
+            ("get", reverse("canals-list")),
+            ("get", reverse("videos-list")),
+            ("get", reverse("video_checkpoints-list")),
             ("get", reverse("download_file", args=["missing.txt"])),
             ("delete", reverse("delete_file", args=["missing.txt"])),
         ]
@@ -65,6 +90,136 @@ class LocalFilesApiTests(TestCase):
             with self.subTest(method=method, url=url):
                 response = getattr(anonymous_client, method)(url)
                 self.assertEqual(response.status_code, 401)
+
+    def test_new_model_endpoints_list_records(self):
+        canal = Canal.objects.create(canal_id="canal-1")
+        video = Video.objects.create(video_id="video-1", canal=canal)
+        UserDetails.objects.create(
+            username=self.user,
+            name="Ada",
+            surname="Lovelace",
+            phone="+441234567890",
+            is_monitored=True,
+        )
+        UserReadBooks.objects.create(
+            titulo="Analytical Engines",
+            autor="Ada Lovelace",
+            descripcion="Notas",
+        )
+        Timestamp.objects.create(titulo="Importado")
+        Todo.objects.create(title="Revisar", description="Revisar vídeo")
+        VideoCheckpoint.objects.create(video=video, start=30, titulo="Inicio")
+
+        for route_name in (
+            "user_details-list",
+            "user_read_books-list",
+            "timestamps-list",
+            "todos-list",
+            "canals-list",
+            "videos-list",
+            "video_checkpoints-list",
+        ):
+            with self.subTest(route_name=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.data)
+                self.assertEqual(response.data["count"], 1)
+
+        user_details_response = self.client.get(reverse("user_details-list"))
+        self.assertEqual(
+            user_details_response.data["results"][0]["username"], "api-user"
+        )
+
+    def test_new_model_endpoints_support_create_update_and_delete(self):
+        cases = [
+            (
+                "user_details",
+                "user_details-list",
+                {
+                    "username": "api-user",
+                    "name": "Ada",
+                    "surname": "Lovelace",
+                    "phone": "123",
+                    "is_monitored": True,
+                },
+                "name",
+                "Augusta",
+            ),
+            (
+                "user_read_books",
+                "user_read_books-list",
+                {"titulo": "Book", "autor": "Ada", "descripcion": "Notes"},
+                "titulo",
+                "Book updated",
+            ),
+            (
+                "timestamps",
+                "timestamps-list",
+                {"titulo": "Import"},
+                "titulo",
+                "Import updated",
+            ),
+            (
+                "todos",
+                "todos-list",
+                {"title": "Review", "description": "Review video"},
+                "completed",
+                True,
+            ),
+            (
+                "canals",
+                "canals-list",
+                {"canal_id": "crud-canal"},
+                "prioridad",
+                5,
+            ),
+            (
+                "videos",
+                "videos-list",
+                {"video_id": "crud-video", "canal": "crud-canal"},
+                "video_visto",
+                True,
+            ),
+            (
+                "video_checkpoints",
+                "video_checkpoints-list",
+                {"video": "crud-video", "start": 0},
+                "start",
+                30,
+            ),
+        ]
+        created_records = []
+
+        for endpoint, list_route, payload, updated_field, updated_value in cases:
+            with self.subTest(endpoint=endpoint):
+                create_response = self.client.post(
+                    reverse(list_route), payload, format="json"
+                )
+                self.assertEqual(create_response.status_code, 201, create_response.data)
+                record_id = create_response.data[
+                    {
+                        "user_details": "id",
+                        "user_read_books": "id",
+                        "timestamps": "id",
+                        "todos": "id",
+                        "canals": "canal_id",
+                        "videos": "video_id",
+                        "video_checkpoints": "video",
+                    }[endpoint]
+                ]
+                detail_url = f"/api/{endpoint}/{record_id}/"
+                update_response = self.client.patch(
+                    detail_url,
+                    {updated_field: updated_value},
+                    format="json",
+                )
+                self.assertEqual(update_response.status_code, 200)
+                self.assertEqual(update_response.data[updated_field], updated_value)
+                created_records.append((endpoint, detail_url))
+
+        for endpoint, detail_url in reversed(created_records):
+            with self.subTest(endpoint=endpoint):
+                delete_response = self.client.delete(detail_url)
+                self.assertEqual(delete_response.status_code, 204)
 
     def test_token_endpoint_authenticates_user(self):
         response = self.client.post(

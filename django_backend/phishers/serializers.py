@@ -1,7 +1,17 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
-from phishers.models import MonitoredUser, MonitoredUserDetails
+from phishers.models import (
+    Canal,
+    MonitoredUser,
+    MonitoredUserDetails,
+    Timestamp,
+    Todo,
+    UserDetails,
+    UserReadBooks,
+    Video,
+    VideoCheckpoint,
+)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -34,3 +44,56 @@ class MonitoredUserDetailsSerializer(serializers.ModelSerializer):
             "phone",
             "is_phished",
         ]
+
+
+class UserDetailsSerializer(serializers.ModelSerializer):
+    username = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field="username",
+    )
+
+    class Meta:
+        model = UserDetails
+        fields = "__all__"
+
+
+class UserReadBooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserReadBooks
+        fields = "__all__"
+
+
+class TimestampSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Timestamp
+        fields = "__all__"
+
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = "__all__"
+
+
+class CanalSerializer(serializers.ModelSerializer):
+    canal_id = serializers.CharField(max_length=200)
+
+    class Meta:
+        model = Canal
+        fields = "__all__"
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    video_id = serializers.CharField(max_length=30)
+
+    class Meta:
+        model = Video
+        fields = "__all__"
+
+
+class VideoCheckpointSerializer(serializers.ModelSerializer):
+    video = serializers.PrimaryKeyRelatedField(queryset=Video.objects.all())
+
+    class Meta:
+        model = VideoCheckpoint
+        fields = "__all__"

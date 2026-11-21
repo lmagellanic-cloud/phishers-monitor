@@ -13,6 +13,19 @@ router.register(
     views.MonitoredUserDetailsViewSet,
     basename="monitored_user_details",
 )
+router.register(r"user_details", views.UserDetailsViewSet, basename="user_details")
+router.register(
+    r"user_read_books", views.UserReadBooksViewSet, basename="user_read_books"
+)
+router.register(r"timestamps", views.TimestampViewSet, basename="timestamps")
+router.register(r"todos", views.TodoViewSet, basename="todos")
+router.register(r"canals", views.CanalViewSet, basename="canals")
+router.register(r"videos", views.VideoViewSet, basename="videos")
+router.register(
+    r"video_checkpoints",
+    views.VideoCheckpointViewSet,
+    basename="video_checkpoints",
+)
 
 urlpatterns = [
     path("", include(router.urls)),

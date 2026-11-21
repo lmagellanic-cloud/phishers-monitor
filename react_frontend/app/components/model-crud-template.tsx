@@ -17,7 +17,17 @@ export type CrudActionData = {
 export type ModelCrudField<T> = {
   name: string;
   label: string;
-  type: "text" | "tel" | "email" | "number" | "url" | "date" | "textarea" | "select" | "checkbox";
+  type:
+    | "text"
+    | "tel"
+    | "email"
+    | "number"
+    | "url"
+    | "date"
+    | "datetime-local"
+    | "textarea"
+    | "select"
+    | "checkbox";
   required?: boolean;
   maxLength?: number;
   min?: number | string;
@@ -28,6 +38,8 @@ export type ModelCrudField<T> = {
   placeholder?: string;
   options?: readonly { value: string; label: string }[];
   emptyOptionsMessage?: string;
+  readOnlyOnEdit?: boolean;
+  omitWhenEmpty?: boolean;
   getValue: (record: T) => string | number | boolean | null;
 };
 
@@ -96,7 +108,7 @@ function CrudFieldControl<T>({ field, record, id }: CrudFieldControlProps<T>) {
       name={field.name}
       required={field.required}
     >
-      <option value="" disabled>
+      <option value="" disabled={field.required}>
         {field.placeholder ?? "Selecciona una opción"}
       </option>
       {options.map((option) => (
@@ -106,6 +118,7 @@ function CrudFieldControl<T>({ field, record, id }: CrudFieldControlProps<T>) {
   ) : field.type === "textarea" ? (
     <textarea
       defaultValue={stringValue}
+      readOnly={Boolean(record && field.readOnlyOnEdit)}
       id={id}
       maxLength={field.maxLength}
       name={field.name}
@@ -117,6 +130,7 @@ function CrudFieldControl<T>({ field, record, id }: CrudFieldControlProps<T>) {
     <input
       autoComplete={field.autoComplete}
       defaultValue={stringValue}
+      readOnly={Boolean(record && field.readOnlyOnEdit)}
       id={id}
       maxLength={field.maxLength}
       min={field.min}

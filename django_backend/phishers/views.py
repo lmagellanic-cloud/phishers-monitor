@@ -10,12 +10,29 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from phishers.models import MonitoredUser, MonitoredUserDetails
+from phishers.models import (
+    Canal,
+    MonitoredUser,
+    MonitoredUserDetails,
+    Timestamp,
+    Todo,
+    UserDetails,
+    UserReadBooks,
+    Video,
+    VideoCheckpoint,
+)
 from phishers.serializers import (
+    CanalSerializer,
     GroupSerializer,
-    MonitoredUserSerializer,
     MonitoredUserDetailsSerializer,
+    MonitoredUserSerializer,
+    TimestampSerializer,
+    TodoSerializer,
+    UserDetailsSerializer,
+    UserReadBooksSerializer,
     UserSerializer,
+    VideoCheckpointSerializer,
+    VideoSerializer,
 )
 
 
@@ -51,6 +68,41 @@ class MonitoredUserDetailsViewSet(viewsets.ModelViewSet):
         "pk"
     )
     serializer_class = MonitoredUserDetailsSerializer
+
+
+class UserDetailsViewSet(viewsets.ModelViewSet):
+    queryset = UserDetails.objects.select_related("username").order_by("pk")
+    serializer_class = UserDetailsSerializer
+
+
+class UserReadBooksViewSet(viewsets.ModelViewSet):
+    queryset = UserReadBooks.objects.all().order_by("pk")
+    serializer_class = UserReadBooksSerializer
+
+
+class TimestampViewSet(viewsets.ModelViewSet):
+    queryset = Timestamp.objects.all().order_by("pk")
+    serializer_class = TimestampSerializer
+
+
+class TodoViewSet(viewsets.ModelViewSet):
+    queryset = Todo.objects.all().order_by("pk")
+    serializer_class = TodoSerializer
+
+
+class CanalViewSet(viewsets.ModelViewSet):
+    queryset = Canal.objects.all().order_by("pk")
+    serializer_class = CanalSerializer
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    queryset = Video.objects.select_related("canal").order_by("pk")
+    serializer_class = VideoSerializer
+
+
+class VideoCheckpointViewSet(viewsets.ModelViewSet):
+    queryset = VideoCheckpoint.objects.select_related("video").order_by("pk")
+    serializer_class = VideoCheckpointSerializer
 
 
 class TokenLogoutView(APIView):

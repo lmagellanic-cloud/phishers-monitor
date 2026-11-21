@@ -6,6 +6,18 @@ const navigationItems = [
   { label: "Detalles usuarios monitorizados", to: "/monitored-user-details" },
   { label: "Usuarios de Django", to: "/users" },
   {
+    label: "Modelos",
+    children: [
+      { label: "Detalles de usuarios", to: "/models/user-details" },
+      { label: "Libros leídos", to: "/models/user-read-books" },
+      { label: "Marcas de tiempo", to: "/models/timestamps" },
+      { label: "Tareas", to: "/models/todos" },
+      { label: "Canales", to: "/models/canals" },
+      { label: "Vídeos", to: "/models/videos" },
+      { label: "Puntos de control de vídeo", to: "/models/video-checkpoints" },
+    ],
+  },
+  {
     label: "Archivos",
     children: [
       { label: "Todos los archivos", to: "/files" },
